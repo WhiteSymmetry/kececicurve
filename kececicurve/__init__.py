@@ -3,10 +3,10 @@ kececicurve - Parametric Space-Filling Curve Family
 Keçeci Eğrisi: Tamamen özgün, çok amaçlı ve esnek bir fraktal eğri üreteci.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __author__ = "Mehmet Keçeci"
 
-from .kececicurve1 import (
+from .kececicurve import (
     # Temel eğri sınıfları
     KececiCurve,
     KececiCurveGenerator,
