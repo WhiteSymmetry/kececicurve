@@ -163,6 +163,45 @@ show_menu()
 
 Bu interaktif menü, **çiçek desenlerinden kuantum algoritmalarına** kadar 30'dan fazla görselleştirme seçeneği sunar.
 
+KEÇECİ CURVE GÖRSELLEŞTİRME MENÜSÜ
+======================================================================
+  1. Çiçek Desenleri
+  2. Galaksi Desenleri
+  3. Kar Taneleri
+  4. Mandala Desenleri
+  5. Fraktal Ağaçlar
+  6. Deniz Canlıları
+  7. Kozmik Ağ
+  8. Sinir Ağı Desenleri
+  9. Virüs Desenleri
+ 10. Lokalite Isı Haritası
+ 11. Süreklilik Görselleştirmesi
+ 12. Radar Grafik Karşılaştırması
+ 13. Sierpinski Karşılaştırması
+ 14. Majorana Görselleştirmeleri
+ 15. Weyl Yarımetali
+ 16. Stratum Mimarisi
+ 17. 3B Wigner Fonksiyonu
+ 18. Dolanıklık Ağı 3B
+ 19. Shor Algoritması
+ 20. Grover Algoritması
+ 21. Deutsch-Jozsa
+ 22. Kuantum Hata Düzeltme
+ 23. Keçeci Eğri Galerisi
+ 24. Kuantum Durumları (Süperpozisyon)
+ 25. Kuantum Dolanıklık
+ 26. Koherens/Dekoherens
+ 27. Kuantum Tünelleme
+ 28. Girişim Deseni
+ 29. Dalga Fonksiyonu Çöküşü
+ 30. Başlangıç-Bitiş Karşılaştırması
+ 31. Kapsamlı Karşılaştırma (Tablo)
+  0. Çıkış
+----------------------------------------------------------------------
+
+Seçiminiz (0-31):  31
+
+
 ---
 
 ## 📚 Kullanım Örnekleri
