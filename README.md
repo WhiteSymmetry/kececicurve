@@ -329,5 +329,5 @@ If this library was useful to you in your research, please cite us. Following th
 
 ```
 
-Keçeci, M. (2026). kececicurve. https://doi.org/10.5281/zenodo.19696338
+Keçeci, M. (2026). kececicurve. Open Science Articles (OSAs), Zenodo. https://doi.org/10.5281/zenodo.19696338
 
