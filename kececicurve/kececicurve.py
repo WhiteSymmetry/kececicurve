@@ -27,10 +27,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.colors import LinearSegmentedColormap
-from mpl_toolkits.mplot3d import Axes3D
+#from mpl_toolkits.mplot3d import Axes3D
+import mpl_toolkits.mplot3d
 from matplotlib.patches import Circle, Rectangle, FancyBboxPatch
 from matplotlib.patches import ConnectionPatch
 from matplotlib import patches
+import matplotlib.patches as mpatches
 import colorsys
 from enum import Enum
 from typing import List, Tuple, Callable, Optional, Union
@@ -2146,7 +2148,176 @@ def test_sierpinski():
     plt.show()
 
 class KececiCurveGenerator:
-    """Parametrik Keçeci Eğrisi üreteci (2B)"""
+    """Genel amaçlı Keçeci Eğrisi üretici (2D varsayılan)"""
+    def __init__(
+        self,
+        num_children: int = 6,
+        max_level: int = 3,
+        scale_factor: float = 0.45,
+        base_radius: float = 3.0,
+        min_radius: float = 0.05,
+        angle_offset: float = 0.0,
+        angle_variation: float = 0.0,
+        radial_variation: float = 0.0,
+        perturbation: float = 0.0,
+        growth_mode: str = 'outward',          # 2D versiyonu için
+        distribution: str = 'fibonacci',        # 3D versiyonu için (ileride genişletilebilir)
+        chirality: float = 0.0,
+        connection_mode: ConnectionMode = ConnectionMode.CONTINUOUS,
+        child_ordering: ChildOrdering = ChildOrdering.SEQUENTIAL,
+        growth_direction: GrowthDirection = GrowthDirection.OUTWARD,
+        color_by_angle: bool = True,
+        color_by_level: bool = False,
+        line_color: str = 'white',
+        line_width: float = 1.0,
+        line_style: str = '-',
+        alpha: float = 0.8,
+        show_points: bool = True,
+        point_size: float = 1.0,
+        color_saturation: float = 1.0,
+        background_color: str = '#0a0a1a',
+        random_seed: int = None,
+        level_dependent_children: bool = False,
+    ):
+        # Parametreleri sakla
+        self.num_children = num_children
+        self.max_level = max_level
+        self.scale_factor = scale_factor
+        self.base_radius = base_radius
+        self.min_radius = min_radius
+        self.angle_offset = angle_offset
+        self.angle_variation = angle_variation
+        self.radial_variation = radial_variation
+        self.perturbation = perturbation
+        self.growth_mode = growth_mode
+        self.distribution = distribution
+        self.chirality = chirality
+        self.connection_mode = connection_mode
+        self.child_ordering = child_ordering
+        self.growth_direction = growth_direction
+        self.color_by_angle = color_by_angle
+        self.color_by_level = color_by_level
+        self.line_color = line_color
+        self.line_width = line_width
+        self.line_style = line_style
+        self.alpha = alpha
+        self.show_points = show_points
+        self.point_size = point_size
+        self.color_saturation = color_saturation
+        self.background_color = background_color
+        self.random_seed = random_seed
+        self.level_dependent_children = level_dependent_children
+        
+        if random_seed is not None:
+            np.random.seed(random_seed)
+        
+        self.all_points = []
+        self.level_points = {}
+    
+    def generate_curve(self, center=(0.0, 0.0), radius=None, level=0, angle=0.0):
+        """2B eğriyi oluştur (gelişmiş parametreleri şimdilik görmezden gel, temel işlevsellik)"""
+        # Basit implementasyon - gelişmiş sıralama ve bağlantı modları daha sonra eklenebilir
+        if radius is None:
+            radius = self.base_radius
+        
+        if level > self.max_level or radius < self.min_radius:
+            self.all_points.append((center, level, angle))
+            if level not in self.level_points:
+                self.level_points[level] = []
+            self.level_points[level].append(center)
+            return
+        
+        self.all_points.append((center, level, angle))
+        if level not in self.level_points:
+            self.level_points[level] = []
+        self.level_points[level].append(center)
+        
+        child_radius = radius * self.scale_factor
+        
+        # Çocuk sıralamasını belirle
+        children_indices = list(range(self.num_children))
+        if self.child_ordering == ChildOrdering.ALTERNATING:
+            children_indices = children_indices[::2] + children_indices[1::2]
+        elif self.child_ordering == ChildOrdering.REVERSE_ALTERNATING:
+            children_indices = children_indices[::-1]
+        elif self.child_ordering == ChildOrdering.RANDOM:
+            np.random.shuffle(children_indices)
+        elif self.child_ordering == ChildOrdering.SPIRAL_OUTWARD:
+            # Açıya göre sırala
+            children_indices = sorted(children_indices, key=lambda i: (2*np.pi*i/self.num_children + self.angle_offset) % (2*np.pi))
+        elif self.child_ordering == ChildOrdering.SPIRAL_INWARD:
+            children_indices = sorted(children_indices, key=lambda i: -(2*np.pi*i/self.num_children + self.angle_offset) % (2*np.pi))
+        
+        for i in children_indices:
+            child_angle = (2 * np.pi * i / self.num_children + self.angle_offset +
+                           self.angle_variation * level + self.chirality * level * i)
+            
+            # Büyüme yönüne göre mesafe ayarla
+            if self.growth_direction == GrowthDirection.INWARD:
+                distance = radius - child_radius
+            elif self.growth_direction == GrowthDirection.TANGENT:
+                distance = radius
+            elif self.growth_direction == GrowthDirection.OVERLAPPING:
+                distance = radius * 0.8
+            else:  # OUTWARD
+                distance = radius + child_radius
+            
+            # Pertürbasyon ekle
+            if self.perturbation > 0:
+                distance *= (1 + self.perturbation * np.random.randn())
+                child_angle += self.perturbation * np.random.randn()
+            
+            child_x = center[0] + distance * np.cos(child_angle)
+            child_y = center[1] + distance * np.sin(child_angle)
+            
+            self.generate_curve((child_x, child_y), child_radius, level + 1, child_angle)
+    
+    def _get_color(self, level: int, angle: float):
+        """Renk döndür (2D/3D uyumlu)"""
+        if self.color_by_level:
+            hue = (level % max(1, self.max_level+1)) / max(1, self.max_level+1)
+            return colorsys.hsv_to_rgb(hue, self.color_saturation, 1.0)
+        elif self.color_by_angle:
+            hue = (angle % (2 * np.pi)) / (2 * np.pi)
+            return colorsys.hsv_to_rgb(hue, self.color_saturation, 1.0)
+        else:
+            return self.line_color
+    
+    def _get_color_for_segment(self, level: int, angle: float):
+        """_get_color ile aynı, geriye dönük uyumluluk için"""
+        return self._get_color(level, angle)
+
+    def _order_children(self, children: list, level: int) -> list:
+        if self.child_ordering == ChildOrdering.SEQUENTIAL:
+            return children
+        elif self.child_ordering == ChildOrdering.ALTERNATING:
+            even = [c for i, c in enumerate(children) if i % 2 == 0]
+            odd = [c for i, c in enumerate(children) if i % 2 == 1]
+            return even + odd
+        elif self.child_ordering == ChildOrdering.SPIRAL_OUTWARD:
+            return sorted(children, key=lambda c: c[2])
+        elif self.child_ordering == ChildOrdering.SPIRAL_INWARD:
+            return sorted(children, key=lambda c: c[2], reverse=True)
+        elif self.child_ordering == ChildOrdering.RANDOM:
+            indices = list(range(len(children)))
+            np.random.shuffle(indices)
+            return [children[i] for i in indices]
+        elif self.child_ordering == ChildOrdering.ANGLE_BASED:
+            return sorted(children, key=lambda c: c[2])
+        elif self.child_ordering == ChildOrdering.QUADRANT:
+            quadrants = {0: [], 1: [], 2: [], 3: []}
+            for child in children:
+                angle = child[2]
+                quadrant = int((angle % (2 * np.pi)) / (np.pi / 2))
+                quadrants[quadrant].append(child)
+            result = []
+            for q in range(4):
+                result.extend(sorted(quadrants[q], key=lambda c: c[2]))
+            return result
+        return children
+"""
+class KececiCurveGenerator:
+    #Parametrik Keçeci Eğrisi üreteci (2B)
     
     def __init__(
         self,
@@ -2244,7 +2415,7 @@ class KececiCurveGenerator:
         return children
     
     def generate_curve(self, center=(0.0, 0.0), radius=None, level=0, angle=0.0):
-        """2B eğriyi oluştur"""
+        #2B eğriyi oluştur
         if radius is None:
             radius = self.base_radius
         
@@ -2287,6 +2458,8 @@ class KececiCurveGenerator:
         
         for child_x, child_y, child_angle in ordered_children:
             self.generate_curve((child_x, child_y), child_radius, level + 1, child_angle)
+"""
+    
 
 # ============================================================================
 # 3B KEÇECİ CURVE GENERATOR
@@ -5326,10 +5499,64 @@ def custom_fibonacci_ordering(children: List[Tuple[float, float, float]], level:
     return [children[i] for i in unique_order]
 
 def show_menu():
-    """Tam menü göster"""
-    print("\n" + "=" * 60)
-    ...
-
+    """Kullanıcı menüsü - tüm görselleştirme seçeneklerini listeler"""
+    menu_options = {
+        '1': ('Çiçek Desenleri', flower_patterns),
+        '2': ('Galaksi Desenleri', galaxy_patterns),
+        '3': ('Kar Taneleri', snowflake_patterns),
+        '4': ('Mandala Desenleri', mandala_patterns),
+        '5': ('Fraktal Ağaçlar', fractal_trees),
+        '6': ('Deniz Canlıları', marine_patterns),
+        '7': ('Kozmik Ağ', cosmic_web),
+        '8': ('Sinir Ağı Desenleri', neural_network_patterns),
+        '9': ('Virüs Desenleri', virus_patterns),
+        '10': ('Lokalite Isı Haritası', locality_heatmap_comparison),
+        '11': ('Süreklilik Görselleştirmesi', continuity_visualization_v2),
+        '12': ('Radar Grafik Karşılaştırması', radar_chart_comparison),
+        '13': ('Sierpinski Karşılaştırması', lambda: plot_sierpinski_comparison(3)),
+        '14': ('Majorana Görselleştirmeleri', lambda: MajoranaVisualizer().visualize_majorana_zero_modes()),
+        '15': ('Weyl Yarımetali', lambda: WeylVisualizer().visualize_weyl_semimetal()),
+        '16': ('Stratum Mimarisi', lambda: StratumModelVisualizer().visualize_stratum_architecture()),
+        '17': ('3B Wigner Fonksiyonu', lambda: Rich3DQuantumVisualizer().visualize_wigner_function_3d()),
+        '18': ('Dolanıklık Ağı 3B', lambda: Rich3DQuantumVisualizer().visualize_entanglement_network_3d()),
+        '19': ('Shor Algoritması', lambda: AdvancedQuantumVisualizer().visualize_shor_algorithm()),
+        '20': ('Grover Algoritması', lambda: AdvancedQuantumVisualizer().visualize_grover_algorithm()),
+        '21': ('Deutsch-Jozsa', lambda: AdvancedQuantumVisualizer().visualize_deutsch_jozsa()),
+        '22': ('Kuantum Hata Düzeltme', lambda: AdvancedQuantumVisualizer().visualize_quantum_error_correction()),
+        '23': ('Keçeci Eğri Galerisi', create_kececi_curve_gallery),
+        '24': ('Kuantum Durumları (Süperpozisyon)', lambda: QuantumKececiCurve().create_superposition_state()),
+        '25': ('Kuantum Dolanıklık', lambda: QuantumKececiCurve().create_entanglement_state()),
+        '26': ('Koherens/Dekoherens', lambda: QuantumKececiCurve().create_coherence_decoherence()),
+        '27': ('Kuantum Tünelleme', lambda: QuantumKececiCurve().create_quantum_tunneling()),
+        '28': ('Girişim Deseni', lambda: QuantumKececiCurve().create_interference_pattern()),
+        '29': ('Dalga Fonksiyonu Çöküşü', lambda: QuantumKececiCurve().create_wave_function_collapse()),
+        '0': ('Çıkış', None)
+    }
+    
+    while True:
+        print("\n" + "="*70)
+        print(" "*20 + "KEÇECİ CURVE GÖRSELLEŞTİRME MENÜSÜ")
+        print("="*70)
+        for key, (desc, _) in menu_options.items():
+            print(f" {key:>2}. {desc}")
+        print("-"*70)
+        
+        choice = input("Seçiminiz (0-29): ").strip()
+        
+        if choice == '0':
+            print("Programdan çıkılıyor...")
+            break
+        elif choice in menu_options:
+            func = menu_options[choice][1]
+            if func:
+                print(f"\n{menu_options[choice][0]} çalıştırılıyor...")
+                try:
+                    func()
+                except Exception as e:
+                    print(f"Hata oluştu: {e}")
+                input("\nDevam etmek için Enter'a basın...")
+        else:
+            print("Geçersiz seçim! Lütfen listeden bir sayı girin.")
 
 if __name__ == "__main__":
-    ...
+    show_menu()
