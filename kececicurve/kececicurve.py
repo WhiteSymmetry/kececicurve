@@ -2144,6 +2144,149 @@ def test_sierpinski():
     plt.tight_layout()
     plt.show()
 
+class KececiCurveGenerator:
+    """Parametrik Keçeci Eğrisi üreteci (2B)"""
+    
+    def __init__(
+        self,
+        num_children: int = 6,
+        max_level: int = 4,
+        scale_factor: float = 0.5,
+        base_radius: float = 4.0,
+        min_radius: float = 0.05,
+        connection_mode: ConnectionMode = ConnectionMode.CONTINUOUS,
+        child_ordering: ChildOrdering = ChildOrdering.SEQUENTIAL,
+        growth_direction: GrowthDirection = GrowthDirection.INWARD,
+        angle_offset: float = 0.0,
+        angle_variation: float = 0.0,
+        radial_variation: float = 0.0,
+        perturbation: float = 0.0,
+        line_style: str = '-',
+        line_width: float = 0.8,
+        line_color: str = 'white',
+        point_size: float = 1.0,
+        show_points: bool = True,
+        color_by_level: bool = False,
+        color_by_angle: bool = False,
+        color_saturation: float = 1.0,
+        alpha: float = 0.8,
+        random_seed: int = None,
+    ):
+        self.num_children = num_children
+        self.max_level = max_level
+        self.scale_factor = scale_factor
+        self.base_radius = base_radius
+        self.min_radius = min_radius
+        
+        self.connection_mode = connection_mode
+        self.child_ordering = child_ordering
+        self.growth_direction = growth_direction
+        
+        self.angle_offset = angle_offset
+        self.angle_variation = angle_variation
+        self.radial_variation = radial_variation
+        self.perturbation = perturbation
+        
+        self.line_style = line_style
+        self.line_width = line_width
+        self.line_color = line_color
+        self.point_size = point_size
+        self.show_points = show_points
+        
+        self.color_by_level = color_by_level
+        self.color_by_angle = color_by_angle
+        self.color_saturation = color_saturation
+        self.alpha = alpha
+        
+        if random_seed is not None:
+            np.random.seed(random_seed)
+            
+        self.all_points = []
+        self.level_points = {}
+    
+    def _get_color_for_segment(self, level: int, angle: float):
+        if self.color_by_level:
+            hue = level / max(1, self.max_level)
+            return colorsys.hsv_to_rgb(hue, self.color_saturation, 1.0)
+        elif self.color_by_angle:
+            hue = (angle % (2 * np.pi)) / (2 * np.pi)
+            return colorsys.hsv_to_rgb(hue, self.color_saturation, 1.0)
+        return self.line_color
+    
+    def _order_children(self, children: list, level: int) -> list:
+        if self.child_ordering == ChildOrdering.SEQUENTIAL:
+            return children
+        elif self.child_ordering == ChildOrdering.ALTERNATING:
+            even = [c for i, c in enumerate(children) if i % 2 == 0]
+            odd = [c for i, c in enumerate(children) if i % 2 == 1]
+            return even + odd
+        elif self.child_ordering == ChildOrdering.SPIRAL_OUTWARD:
+            return sorted(children, key=lambda c: c[2])
+        elif self.child_ordering == ChildOrdering.SPIRAL_INWARD:
+            return sorted(children, key=lambda c: c[2], reverse=True)
+        elif self.child_ordering == ChildOrdering.RANDOM:
+            indices = list(range(len(children)))
+            np.random.shuffle(indices)
+            return [children[i] for i in indices]
+        elif self.child_ordering == ChildOrdering.ANGLE_BASED:
+            return sorted(children, key=lambda c: c[2])
+        elif self.child_ordering == ChildOrdering.QUADRANT:
+            quadrants = {0: [], 1: [], 2: [], 3: []}
+            for child in children:
+                angle = child[2]
+                quadrant = int((angle % (2 * np.pi)) / (np.pi / 2))
+                quadrants[quadrant].append(child)
+            result = []
+            for q in range(4):
+                result.extend(sorted(quadrants[q], key=lambda c: c[2]))
+            return result
+        return children
+    
+    def generate_curve(self, center=(0.0, 0.0), radius=None, level=0, angle=0.0):
+        """2B eğriyi oluştur"""
+        if radius is None:
+            radius = self.base_radius
+        
+        if level > self.max_level or radius < self.min_radius:
+            self.all_points.append((center, level, angle))
+            if level not in self.level_points:
+                self.level_points[level] = []
+            self.level_points[level].append(center)
+            return
+        
+        self.all_points.append((center, level, angle))
+        if level not in self.level_points:
+            self.level_points[level] = []
+        self.level_points[level].append(center)
+        
+        children = []
+        for i in range(self.num_children):
+            child_angle = 2 * np.pi * i / self.num_children + self.angle_offset + self.angle_variation * level
+            child_radius = radius * self.scale_factor
+            
+            if self.growth_direction == GrowthDirection.INWARD:
+                distance = radius - child_radius
+            elif self.growth_direction == GrowthDirection.OUTWARD:
+                distance = radius + child_radius
+            elif self.growth_direction == GrowthDirection.TANGENT:
+                distance = radius
+            else:  # OVERLAPPING
+                distance = radius * (1 - self.scale_factor * 0.5)
+            
+            child_x = center[0] + distance * np.cos(child_angle)
+            child_y = center[1] + distance * np.sin(child_angle)
+            
+            if self.perturbation > 0:
+                child_x += np.random.normal(0, self.perturbation * radius)
+                child_y += np.random.normal(0, self.perturbation * radius)
+            
+            children.append((child_x, child_y, child_angle))
+        
+        ordered_children = self._order_children(children, level)
+        
+        for child_x, child_y, child_angle in ordered_children:
+            self.generate_curve((child_x, child_y), child_radius, level + 1, child_angle)
+
 # ============================================================================
 # 3B KEÇECİ CURVE GENERATOR
 # ============================================================================
