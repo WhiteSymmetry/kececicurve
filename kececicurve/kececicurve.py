@@ -1,6 +1,13 @@
 """
 # kececicurve.py: Keçeci Curve, Keçeci Eğrisi
 
+Keçeci Curve (kececicurve: Keçeci Eğrisi) – Parametric Space-Filling Curve Family
+
+Keçeci Eğrisi, uzay doldurma eğrileri ailesine yeni, tamamen özgün ve son derece esnek bir üyedir.
+Dairesel geometri, ayarlanabilir çocuk sayısı, büyüme yönü, sıralama stratejileri ve açı varyasyonları ile klasik eğrilerin ötesine geçen parametrik bir fraktal eğri üretecidir.
+
+Bu depo aynı zamanda Hilbert, Morton, Moore ve Sierpinski eğrilerini de içerir; lokalite (yerellik) karşılaştırmaları, süreklilik analizleri ve ileri kuantum fenomenlerinin (Majorana, Weyl, topolojik yarımetaller, Stratum modeli) 2B/3B görselleştirmelerini sunar.
+
 Uzay Doldurma Eğrileri - Lokalite (Yerellik) Karşılaştırması
 Isı haritası ile hangi eğrinin uzamsal yakınlığı daha iyi koruduğunu gösterir
 
