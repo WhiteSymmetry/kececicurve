@@ -4,7 +4,7 @@
 
 [![PyPI version](https://badge.fury.io/py/kececicurve.svg)](https://badge.fury.io/py/kececicurve/)
 [![License: AGPL](https://img.shields.io/badge/License-AGPL-yellow.svg)](https://opensource.org/licenses/AGPL)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.***.svg)](https://doi.org/10.5281/zenodo.***)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19696338.svg)](https://doi.org/10.5281/zenodo.19696338)
 [![WorkflowHub DOI](https://img.shields.io/badge/DOI-10.48546%2Fworkflowhub.datafile.***-blue)](https://doi.org/10.48546/workflowhub.datafile.***)
 [![figshare DOI](https://img.shields.io/badge/DOI-10.6084/m9.figshare.***-blue)](https://doi.org/10.6084/m9.figshare.***)
 
@@ -313,15 +313,15 @@ If this library was useful to you in your research, please cite us. Following th
 ### BibTeX
 
 ```bibtex
-@misc{kececi_2026_...,
+@misc{kececi_2026_19696338,
   author       = {Keçeci, Mehmet},
   title        = {kececicurve},
   month        = apr,
   year         = 2026,
   publisher    = {Zenodo},
   version      = {0.1.0},
-  doi          = {},
-  url          = {https://doi.org/},
+  doi          = {10.5281/zenodo.19696338},
+  url          = {https://doi.org/10.5281/zenodo.19696338},
 }
 ```
 
@@ -329,5 +329,5 @@ If this library was useful to you in your research, please cite us. Following th
 
 ```
 
-Keçeci, M. (2026). kececicurve. 
+Keçeci, M. (2026). kececicurve. https://doi.org/10.5281/zenodo.19696338
 
