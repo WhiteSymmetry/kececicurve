@@ -139,6 +139,7 @@ pip install numpy matplotlib
 ### Temel Kullanım
 
 ```python
+import numpy as np
 from kececicurve import KececiCurve, quick_plot
 
 # 5 çocuklu, 3 seviyeli bir Keçeci eğrisi oluştur
