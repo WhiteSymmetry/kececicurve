@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # _version.py
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __license__ = "AGPL-3.0-or-later"
 __description__ = "kececicurve, Keçeci Curve, Keçeci Eğrisi Modülü"
 __author__ = "Mehmet Keçeci"
