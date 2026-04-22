@@ -5530,6 +5530,8 @@ def show_menu():
         '27': ('Kuantum Tünelleme', lambda: QuantumKececiCurve().create_quantum_tunneling()),
         '28': ('Girişim Deseni', lambda: QuantumKececiCurve().create_interference_pattern()),
         '29': ('Dalga Fonksiyonu Çöküşü', lambda: QuantumKececiCurve().create_wave_function_collapse()),
+        '30': ('Başlangıç-Bitiş Karşılaştırması', lambda: CurveComparisonVisualizer().create_start_end_comparison()),
+        '31': ('Kapsamlı Karşılaştırma (Tablo)', lambda: CurveComparisonVisualizer().create_comprehensive_comparison()),
         '0': ('Çıkış', None)
     }
     
@@ -5541,7 +5543,7 @@ def show_menu():
             print(f" {key:>2}. {desc}")
         print("-"*70)
         
-        choice = input("Seçiminiz (0-29): ").strip()
+        choice = input("Seçiminiz (0-31): ").strip()
         
         if choice == '0':
             print("Programdan çıkılıyor...")
