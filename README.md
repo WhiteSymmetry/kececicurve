@@ -1,5 +1,4 @@
 # kececicurve
-kececicurve (Keçeci Curve, Keçeci Eğrisi)
 
 # Keçeci Curve (kececicurve, Keçeci Eğrisi) <img src="docs/logo.jpg" alt="Keçeci Curve (kececicurve, Keçeci Eğrisi)" align="right" height="140"/>
 
