@@ -72,7 +72,7 @@
 
 ---
 
-# 🌿 Keçeci Curve (kececicurve: Keçeci eğrisi)  – Parametric Space-Filling Curve Family
+# 🌿 Keçeci Curve (kececicurve: Keçeci Eğrisi)  – Parametric Space-Filling Curve Family
 
 **Keçeci Eğrisi**, uzay doldurma eğrileri ailesine yeni, tamamen özgün ve son derece esnek bir üyedir.  
 Dairesel geometri, ayarlanabilir çocuk sayısı, büyüme yönü, sıralama stratejileri ve açı varyasyonları ile **klasik eğrilerin ötesine geçen** parametrik bir fraktal eğri üretecidir.
