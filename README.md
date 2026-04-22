@@ -254,8 +254,8 @@ gen.generate_curve()
 
 ```
 kececicurve/
-├── __init__.py               # Paket dışa aktarımları
-├── kececicurve.py            # Ana modül (tüm sınıflar ve fonksiyonlar)
+├── kececicurve/__init__.py               # Paket dışa aktarımları
+├── kececicurve/kececicurve.py            # Ana modül (tüm sınıflar ve fonksiyonlar)
 ├── README.md                 # Bu dosya
 ├── LICENSE                   # Lisans bilgisi
 └── pyproject.toml            # Paket yapılandırması
