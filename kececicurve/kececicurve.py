@@ -30,6 +30,7 @@ from matplotlib.colors import LinearSegmentedColormap
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.patches import Circle, Rectangle, FancyBboxPatch
 from matplotlib.patches import ConnectionPatch
+from matplotlib import patches
 import colorsys
 from enum import Enum
 from typing import List, Tuple, Callable, Optional, Union
