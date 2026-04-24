@@ -24,6 +24,7 @@ def get_install_requires():
     base_requires = [
         "numpy",
         "matplotlib",
+        "scipy",
     ]
 
 setup(
