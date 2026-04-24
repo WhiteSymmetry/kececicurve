@@ -112,6 +112,7 @@ Bu depo aynı zamanda Hilbert, Morton, Moore ve Sierpinski eğrilerini de içeri
 - **⚡ Optimize Edilmiş Performans**
   - Sonuçları önbelleğe alan `KececiCurve` sınıfı sayesinde tekrarlı üretimlerde hız.
 
+# Keçeci Curve (kececicurve, Keçeci Eğrisi) <img src="example/kcd1.png" alt="Keçeci Curve (kececicurve, Keçeci Eğrisi)" align="left"/>
 ---
 
 ## 📦 Kurulum
