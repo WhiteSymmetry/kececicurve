@@ -42,6 +42,7 @@ from matplotlib import patches
 import matplotlib.patches as mpatches
 import colorsys
 from enum import Enum
+from scipy.spatial import KDTree
 from typing import List, Tuple, Callable, Optional, Union
 import warnings
 warnings.filterwarnings('ignore')
@@ -276,6 +277,45 @@ class ClassicalCurves:
         
         return cleaned
 
+    @staticmethod
+    def peano_curve(order: int) -> List[Tuple[float, float]]:
+        """
+        Peano eğrisi (merkez‑dolaşan, [step/2, 1‑step/2]² aralığında).
+        Nokta sayısı = 9^order, adım = 1 / 3^order.
+        """
+        axiom = "X"
+        rules = {
+            'X': "XFYFX+F+YFXFY-F-XFYFX",
+            'Y': "YFXFY-F-XFYFX+F+YFXFY"
+        }
+        s = axiom
+        for _ in range(order):
+            s = ''.join(rules.get(ch, ch) for ch in s)
+
+        step = 1.0 / (3 ** order)
+        angle = 0.0          # doğu
+        x, y = 0.0, 0.0
+        pts = [(x, y)]
+
+        for ch in s:
+            if ch == 'F':
+                x += step * np.cos(angle)
+                y += step * np.sin(angle)
+                pts.append((x, y))
+            elif ch == '+':
+                angle -= np.pi / 2   # saat yönünde 90°
+            elif ch == '-':
+                angle += np.pi / 2   # tersi yönde 90°
+
+        # 1) Saat yönünün tersine 90° döndür (negatif Y'yi pozitif X’e çevir)
+        pts = [(-y, x) for x, y in pts]
+
+        # 2) Merkezlemek için (step/2, step/2) ötele
+        offset = step / 2.0
+        pts = [(x + offset, y + offset) for x, y in pts]
+
+        return pts
+
 
 class CurveComparisonVisualizer:
     
@@ -283,16 +323,14 @@ class CurveComparisonVisualizer:
         pass
     
     def create_start_end_comparison(self):
-        """
-        Başlangıç-Bitiş ilişkisi karşılaştırması
-        """
-        fig, axes = plt.subplots(2, 3, figsize=(18, 12))
+        fig, axes = plt.subplots(2, 4, figsize=(24, 12))
         fig.patch.set_facecolor('#0a0a1a')
-        
-        curves = ['Keçeci', 'Hilbert', 'Morton', 'Moore', 'Sierpinski']
-        
+        axes_flat = axes.flatten()          # ← tanımlandı
+
+        curves = ['Keçeci', 'Hilbert', 'Morton', 'Moore', 'Sierpinski', 'Peano']
+
         for idx, curve_name in enumerate(curves):
-            ax = axes[idx // 3, idx % 3]
+            ax = axes_flat[idx]
             ax.set_facecolor('#0a0a1a')
             
             points = self._get_curve_points(curve_name, 3)
@@ -301,27 +339,20 @@ class CurveComparisonVisualizer:
             if len(points) > 1:
                 xs = [p[0] for p in points]
                 ys = [p[1] for p in points]
-                
-                # Ana eğri
                 ax.plot(xs, ys, '-', color=color, linewidth=2.5, alpha=0.8)
-                
-                # Başlangıç ve bitiş noktaları
                 ax.scatter(xs[0], ys[0], color='white', s=200, marker='o', 
                           edgecolor=color, linewidth=3, zorder=10, label='Başlangıç')
                 ax.scatter(xs[-1], ys[-1], color='yellow', s=200, marker='s', 
                           edgecolor=color, linewidth=3, zorder=10, label='Bitiş')
                 
-                # Başlangıç ve bitiş arası mesafe analizi
                 dist = np.sqrt((xs[0] - xs[-1])**2 + (ys[0] - ys[-1])**2)
                 
                 if curve_name == 'Moore':
                     ax.plot([xs[0], xs[-1]], [ys[0], ys[-1]], '--', 
                            color='yellow', linewidth=2, alpha=0.7, 
                            label=f'1-Birim Komşu ({dist:.3f})')
-                    
                     ax.text(0.5, -0.15, 
-                           f"Başlangıç-Bitiş: 1-Birim Komşu\n"
-                           f"(Kapalı Döngü DEĞİL)",
+                           f"Başlangıç-Bitiş: 1-Birim Komşu\n(Kapalı Döngü DEĞİL)",
                            transform=ax.transAxes,
                            color='yellow', fontsize=11, ha='center',
                            bbox=dict(boxstyle='round', facecolor='#1a1a3a', 
@@ -332,6 +363,12 @@ class CurveComparisonVisualizer:
                            transform=ax.transAxes,
                            color='#88ff88' if dist < 0.1 else 'white', 
                            fontsize=10, ha='center')
+                elif curve_name == 'Peano':
+                    ax.text(0.5, -0.15, f"Başlangıç-Bitiş: Açık Döngü\nMesafe: {dist:.3f}",
+                           transform=ax.transAxes,
+                           color='#ff9944', fontsize=10, ha='center',
+                           bbox=dict(boxstyle='round', facecolor='#1a1a3a', 
+                                    edgecolor='#ff9944', alpha=0.8))
                 else:
                     status = "Kapalı Döngü" if dist < 0.1 else f"Mesafe: {dist:.3f}"
                     ax.text(0.5, -0.15, f"Başlangıç-Bitiş: {status}",
@@ -339,39 +376,37 @@ class CurveComparisonVisualizer:
                            color='white', fontsize=10, ha='center')
             
             self._add_background_grid(ax, points)
-            
-            title = f"\n{curve_name} Eğrisi\n{COMPARISON_DATA[curve_name]['desc']}"
-            ax.set_title(title, color='white', fontsize=12, fontweight='bold')
+            ax.set_title(f"\n{curve_name} Eğrisi\n{COMPARISON_DATA[curve_name]['desc']}", 
+                        color='white', fontsize=12, fontweight='bold')
             ax.set_aspect('equal')
             ax.set_xticks([])
             ax.set_yticks([])
-            
             for spine in ax.spines.values():
                 spine.set_color('#333366')
         
-        # 6. subplot: Karşılaştırma tablosu
-        ax_info = axes[1, 2]
-        ax_info.set_facecolor('#0a0a1a')
-        self._draw_start_end_table(ax_info)
+        # Tablo için 7. ekseni kullan
+        ax_table = axes_flat[6]
+        ax_table.set_facecolor('#0a0a1a')
+        self._draw_start_end_table(ax_table)
+        
+        # Son ekseni gizle
+        axes_flat[7].set_visible(False)
         
         plt.suptitle("Uzay Doldurma Eğrilerinde Başlangıç-Bitiş İlişkisi\n"
-                    "Moore: 1-Birim Komşu | Sierpinski: Kapalı Döngü", 
+                    "Moore: 1-Birim Komşu | Sierpinski: Kapalı Döngü | Peano: Açık Döngü", 
                     color='white', fontsize=16, fontweight='bold', y=0.99)
-        
         plt.tight_layout()
         plt.show()
-        
         return fig
     
     def create_comprehensive_comparison(self):
-        """Kapsamlı karşılaştırma"""
         fig = plt.figure(figsize=(24, 14))
         fig.patch.set_facecolor('#0a0a1a')
         
-        curves = ['Keçeci', 'Hilbert', 'Morton', 'Moore', 'Sierpinski']
+        curves = ['Keçeci', 'Hilbert', 'Morton', 'Moore', 'Sierpinski', 'Peano']
         
         for idx, curve_name in enumerate(curves):
-            ax = fig.add_subplot(2, 3, idx + 1)
+            ax = fig.add_subplot(2, 4, idx + 1)   # 1..6
             ax.set_facecolor('#0a0a1a')
             
             points = self._get_curve_points(curve_name, 3)
@@ -380,38 +415,35 @@ class CurveComparisonVisualizer:
             if len(points) > 1:
                 xs = [p[0] for p in points]
                 ys = [p[1] for p in points]
-                
                 ax.plot(xs, ys, '-', color=color, linewidth=2.5, alpha=0.9)
-                
                 ax.scatter(xs[0], ys[0], color='white', s=100, marker='o', 
                           edgecolor=color, linewidth=2, zorder=5)
                 ax.scatter(xs[-1], ys[-1], color='yellow', s=100, marker='s', 
                           edgecolor=color, linewidth=2, zorder=5)
-                
                 if curve_name == 'Moore':
                     ax.plot([xs[0], xs[-1]], [ys[0], ys[-1]], '--', 
                            color='yellow', linewidth=1.5, alpha=0.5)
             
             self._add_background_grid(ax, points)
-            
-            title = f"{curve_name}\n{COMPARISON_DATA[curve_name]['desc']}"
-            ax.set_title(title, color='white', fontsize=12, fontweight='bold')
+            ax.set_title(f"{curve_name}\n{COMPARISON_DATA[curve_name]['desc']}", 
+                        color='white', fontsize=12, fontweight='bold')
             ax.set_aspect('equal')
             ax.set_xticks([])
             ax.set_yticks([])
-            
             for spine in ax.spines.values():
                 spine.set_color('#333366')
         
-        ax_table = fig.add_subplot(2, 3, 6)
+        # Tablo için 7. eksen
+        ax_table = fig.add_subplot(2, 4, 7)
         ax_table.set_facecolor('#0a0a1a')
         self._draw_comparison_table(ax_table)
+        
+        # 8. hücre boş kalacak – otomatik görünmez.
         
         plt.suptitle("Uzay Doldurma Eğrileri Karşılaştırması", 
                     color='white', fontsize=18, fontweight='bold', y=0.98)
         plt.tight_layout()
         plt.show()
-        
         return fig
     
     def _get_curve_points(self, curve_name: str, level: int) -> List:
@@ -426,6 +458,8 @@ class CurveComparisonVisualizer:
             return ClassicalCurves.moore_curve(level)
         elif curve_name == 'Sierpinski':
             return ClassicalCurves.sierpinski_curve(level)
+        elif curve_name == 'Peano':
+            return ClassicalCurves.peano_curve(level)
         return []
     
     def _add_background_grid(self, ax, points):
@@ -454,54 +488,61 @@ class CurveComparisonVisualizer:
         ax.set_ylim(y_min, y_max)
     
     def _draw_comparison_table(self, ax):
-        ax.set_xlim(0, 10)
+        ax.set_xlim(0, 12)   # genişletildi
         ax.set_ylim(0, 10)
         ax.axis('off')
         
-        ax.text(5, 9.5, "Özellik Karşılaştırma Tablosu", color='white', fontsize=14, 
+        ax.text(6, 9.5, "Özellik Karşılaştırma Tablosu", color='white', fontsize=14, 
                fontweight='bold', ha='center')
         
-        headers = ['Özellik', 'Keçeci', 'Hilbert', 'Morton', 'Moore', 'Sierpinski']
-        header_colors = ['#666666', '#ff4444', '#4488ff', '#44ff44', '#ffff44', '#ff44ff']
+        headers = ['Özellik', 'Keçeci', 'Hilbert', 'Morton', 'Moore', 'Sierpinski', 'Peano']
+        header_colors = ['#666666', '#ff4444', '#4488ff', '#44ff44', '#ffff44', '#ff44ff', '#ff9944']
         
+        # Sütun sayısı 7, başlangıç x = 0.8, aralık 1.6
         for i, (header, color) in enumerate(zip(headers, header_colors)):
-            x = 0.5 + i * 1.6
+            x = 0.8 + i * 1.6
             ax.text(x, 8.5, header, color=color, fontsize=9, fontweight='bold', ha='center')
         
         rows = [
-            ('Geometri', 'Dairesel', 'Kare', 'Kare', 'Kare', 'Üçgen'),
-            ('Başlangıç-Bitiş', 'Değişken', 'Uzak', 'Uzak', '1-Birim Komşu ⭐', 'Kapalı ✅'),
-            ('Süreklilik', 'İsteğe Bağlı', 'Sürekli', 'Sıçramalı', 'Sürekli', 'Kapalı'),
-            ('Lokalite', 'Yüksek', 'Çok Yüksek', 'Orta', 'Yüksek', 'Orta'),
+            ('Geometri', 'Dairesel', 'Kare', 'Kare', 'Kare', 'Üçgen', 'Kare'),
+            ('Başlangıç-Bitiş', 'Değişken', 'Uzak', 'Uzak', '1-Birim Komşu ⭐', 'Kapalı ✅', 'Açık (ayrık)'),
+            ('Süreklilik', 'İsteğe Bağlı', 'Sürekli', 'Sıçramalı', 'Sürekli', 'Kapalı', 'Sürekli'),
+            ('Lokalite', 'Yüksek', 'Çok Yüksek', 'Orta', 'Yüksek', 'Orta', 'Düşük-Orta'),
         ]
         
         for row_idx, (feature, *values) in enumerate(rows):
             y = 7.0 - row_idx * 1.2
             
-            ax.text(0.5, y, feature, color='#aaaaff', fontsize=9, ha='left')
+            ax.text(0.8, y, feature, color='#aaaaff', fontsize=9, ha='left')
             
             for col_idx, value in enumerate(values):
-                x = 2.1 + col_idx * 1.6
+                x = 0.8 + (col_idx + 1) * 1.6
                 
-                if col_idx == 0:
+                if col_idx == 0:   # Keçeci
                     ax.text(x, y, value, color='#ff8888', fontsize=9, ha='center', fontweight='bold')
-                elif col_idx == 3 and 'Komşu' in value:
+                elif col_idx == 3 and 'Komşu' in value:   # Moore
                     ax.text(x, y, value, color='yellow', fontsize=9, ha='center', fontweight='bold')
-                elif col_idx == 4 and 'Kapalı' in value:
+                elif col_idx == 4 and 'Kapalı' in value:  # Sierpinski
                     ax.text(x, y, value, color='#88ff88', fontsize=9, ha='center', fontweight='bold')
+                elif col_idx == 5 and 'Açık' in value:    # Peano
+                    ax.text(x, y, value, color='#ff9944', fontsize=9, ha='center', fontweight='bold')
                 else:
                     ax.text(x, y, value, color='white', fontsize=9, ha='center')
         
-        ax.text(5, 1.8, "⭐ Moore: 1-birim komşu (Kapalı DEĞİL)", 
+        # Açıklama satırları (çakışmayı önlemek için ayrı satırlara bölündü)
+        ax.text(6, 1.8, "⭐ Moore: 1-birim komşu (Açık Döngü)", 
                color='yellow', fontsize=10, ha='center',
                bbox=dict(boxstyle='round', facecolor='#1a1a3a', edgecolor='yellow'))
-        ax.text(5, 0.8, "✅ Sierpinski: Aynı noktada birleşir (Kapalı Döngü)", 
+        ax.text(6, 1.3, "✅ Sierpinski: Aynı noktada birleşir (Kapalı Döngü)", 
                color='#88ff88', fontsize=10, ha='center',
                bbox=dict(boxstyle='round', facecolor='#1a1a3a', edgecolor='#88ff88'))
+        ax.text(6, 0.8, "🔶 Peano: Başlangıç ve bitiş ayrıktır (Açık Döngü)", 
+               color='#ff9944', fontsize=10, ha='center',
+               bbox=dict(boxstyle='round', facecolor='#1a1a3a', edgecolor='#ff9944'))
     
     def _draw_start_end_table(self, ax):
         ax.set_xlim(0, 10)
-        ax.set_ylim(0,10)
+        ax.set_ylim(0, 10)
         ax.axis('off')
         
         ax.text(5, 9.5, "Başlangıç-Bitiş İlişkisi", color='white', fontsize=14, 
@@ -510,18 +551,20 @@ class CurveComparisonVisualizer:
         info = [
             ("Hilbert", "Uzak (ayrık uçlar)", '#4488ff'),
             ("Morton", "Uzak (sıçramalı)", '#44ff44'),
-            ("Moore", "1-Birim Komşu ⭐ (kapalı DEĞİL)", '#ffff44'),
+            ("Moore", "1-Birim Komşu ⭐ (açık döngü)", '#ffff44'),
             ("Sierpinski", "Kapalı Döngü ✅ (aynı nokta)", '#ff44ff'),
             ("Keçeci", "Parametrik - Ayarlanabilir", '#ff4444'),
+            ("Peano", "Açık Döngü (ayrık uçlar)", '#ff9944'),
         ]
         
         for i, (name, desc, color) in enumerate(info):
-            y = 7.5 - i * 1.2
+            y = 8.5 - i * 1.2
             ax.text(1, y, f"{name}:", color=color, fontsize=11, fontweight='bold')
             ax.text(3.5, y, desc, color='white', fontsize=10)
         
-        ax.text(5, 1.5, "Moore: Başlangıç ve bitiş 1 birim komşudur\n"
-                         "Sierpinski: Başlangıç ve bitiş aynı noktadır (Kapalı)",
+        ax.text(5, 1.0, "Moore: Başlangıç ve bitiş 1 birim komşudur (Açık)\n"
+                         "Sierpinski: Başlangıç ve bitiş aynı noktadır (Kapalı)\n"
+                         "Peano: Başlangıç ve bitiş birbirinden uzaktır (Açık)",
                color='white', fontsize=10, ha='center',
                bbox=dict(boxstyle='round', facecolor='#1a1a3a', edgecolor='#333366'))
 
@@ -1007,42 +1050,41 @@ COMPARISON_DATA = {
         'geometry': 'Üçgen',
         'children': '3',
         'dimensions': '2B'
-    }
+    },
+    'Peano': {
+        'color': '#ff9944',
+        'desc': 'Sabit 9‑çocuk, Kare (merkez‑dolaşan)',
+        'start_end': 'Açık (ayrık uçlar)',
+        'continuity': 'Sürekli (yatay/dikey)',
+        'locality': 'Düşük‑Orta',
+        'geometry': 'Kare (3×3 tabanlı)',
+        'children': '9',
+        'dimensions': '2B'
+    },
 }
 
 def locality_heatmap_comparison():
-    """
-    Her eğri için lokalite ısı haritası oluşturur
-    
-    Isı haritası: İndeks olarak yakın noktaların uzamsal mesafesini gösterir
-    - Kırmızı: İndeks yakın ama uzamsal uzak (KÖTÜ lokalite)
-    - Yeşil/Mavi: İndeks yakın ve uzamsal yakın (İYİ lokalite)
-    """
-    
     fig, axes = plt.subplots(2, 3, figsize=(18, 12))
     fig.patch.set_facecolor('#0a0a1a')
     
-    curves = ['Hilbert', 'Morton', 'Moore', 'Sierpinski', 'Keçeci']
+    curves = ['Hilbert', 'Morton', 'Moore', 'Sierpinski', 'Keçeci', 'Peano']
     titles = ['Hilbert (En İyi Lokalite)', 'Morton (Z-Order)', 'Moore (Döngüsel)', 
-              'Sierpinski (Üçgen)', 'Keçeci (Parametrik)']
+              'Sierpinski (Üçgen)', 'Keçeci (Parametrik)', 'Peano (Açık)']
     
     viz = CurveComparisonVisualizer()
     
-    # Tüm matrisler için global vmin/vmax hesapla
     all_matrices = []
     for curve_name in curves:
         points = viz._get_curve_points(curve_name, 4)
         points = np.array(points)
         n = min(64, len(points))
         locality_matrix = np.zeros((n, n))
-        
         for i in range(n):
             for j in range(n):
                 if i != j:
                     idx_dist = abs(i - j)
                     spatial_dist = np.linalg.norm(points[i] - points[j])
                     locality_matrix[i, j] = spatial_dist / (idx_dist + 1)
-        
         all_matrices.append(locality_matrix)
     
     global_vmax = max(m.max() for m in all_matrices)
@@ -1050,15 +1092,10 @@ def locality_heatmap_comparison():
     for idx, (curve_name, title) in enumerate(zip(curves, titles)):
         ax = axes[idx // 3, idx % 3]
         ax.set_facecolor('#0a0a1a')
-        
-        # Eğriyi oluştur
         points = viz._get_curve_points(curve_name, 4)
         points = np.array(points)
-        
-        # Lokalite matrisi oluştur
         n = min(64, len(points))
         locality_matrix = np.zeros((n, n))
-        
         for i in range(n):
             for j in range(n):
                 if i != j:
@@ -1066,25 +1103,19 @@ def locality_heatmap_comparison():
                     spatial_dist = np.linalg.norm(points[i] - points[j])
                     locality_matrix[i, j] = spatial_dist / (idx_dist + 1)
         
-        # Isı haritasını çiz
         im = ax.imshow(locality_matrix, cmap='RdYlGn_r', aspect='auto', 
                       interpolation='bilinear', vmin=0, vmax=global_vmax)
-        
         ax.set_title(f"{title}\n(Koyu yeşil = iyi lokalite, Kırmızı = kötü)", 
                     color='white', fontsize=11)
         ax.set_xlabel('İndeks', color='white')
         ax.set_ylabel('İndeks', color='white')
         ax.tick_params(colors='white')
     
-    # Boş subplot'u gizle
-    axes[1, 2].set_visible(False)
-    
-    # ================================================================
-    # DÜZELTME: Renk çubuğunu doğru konuma yerleştir
-    # ================================================================
-    # Figürün sağ tarafında yeni bir eksen oluştur
+    # Renk çubuğu (artık 6 eğri olduğu için boş subplot yok; yandan ekliyoruz)
     cbar_ax = fig.add_axes([0.92, 0.25, 0.015, 0.5])
-    cbar = fig.colorbar(im, cax=cbar_ax)
+    sm = plt.cm.ScalarMappable(cmap='RdYlGn_r', norm=plt.Normalize(vmin=0, vmax=global_vmax))
+    sm.set_array([])
+    cbar = fig.colorbar(sm, cax=cbar_ax)
     cbar.set_label('Uzamsal Mesafe / İndeks Mesafesi\n(Düşük = İyi Lokalite)', 
                    color='white', fontsize=10)
     cbar_ax.tick_params(colors='white')
@@ -1094,7 +1125,7 @@ def locality_heatmap_comparison():
                 "Koyu yeşil: İndeks yakınlığı = Uzamsal yakınlık (İYİ)\n"
                 "Kırmızı: İndeks yakın ama uzamsal uzak (KÖTÜ)", 
                 color='white', fontsize=14, fontweight='bold', y=1.02)
-    plt.tight_layout(rect=[0, 0, 0.9, 0.95])  # Sağda renk çubuğu için yer bırak
+    plt.tight_layout(rect=[0, 0, 0.9, 0.95])
     plt.show()
 
 
@@ -1109,10 +1140,10 @@ def continuity_visualization():
     fig, axes = plt.subplots(2, 3, figsize=(18, 12))
     fig.patch.set_facecolor('#0a0a1a')
     
-    curves = ['Keçeci', 'Hilbert', 'Morton', 'Moore', 'Sierpinski']
+    curves = ['Keçeci', 'Hilbert', 'Morton', 'Moore', 'Sierpinski' 'Peano']
     colors_map = ['#ff4444', '#4488ff', '#44ff44', '#ffff44', '#ff44ff']
     titles = ['Keçeci (Parametrik)', 'Hilbert (Sürekli)', 'Morton (Sıçramalı)', 
-              'Moore (Döngüsel)', 'Sierpinski (Kapalı)']
+              'Moore (Döngüsel)', 'Sierpinski (Kapalı)', 'Peano (Açık)']
     
     viz = CurveComparisonVisualizer()
     
@@ -1186,29 +1217,24 @@ def continuity_visualization():
     plt.show()
 
 def continuity_visualization_v2():
-    """
-    Alternatif: Renk çubuğunu boş subplot'a yerleştir
-    """
-    
-    fig, axes = plt.subplots(2, 3, figsize=(18, 12))
+    fig, axes = plt.subplots(2, 4, figsize=(24, 12))   # 2x4 grid
     fig.patch.set_facecolor('#0a0a1a')
+    axes_flat = axes.flatten()
     
-    curves = ['Keçeci', 'Hilbert', 'Morton', 'Moore', 'Sierpinski']
-    colors_map = ['#ff4444', '#4488ff', '#44ff44', '#ffff44', '#ff44ff']
-    titles = ['Keçeci', 'Hilbert', 'Morton (Sıçramalı)', 'Moore', 'Sierpinski']
+    curves = ['Keçeci', 'Hilbert', 'Morton', 'Moore', 'Sierpinski', 'Peano']
+    colors_map = ['#ff4444', '#4488ff', '#44ff44', '#ffff44', '#ff44ff', '#ff9944']
+    titles = ['Keçeci', 'Hilbert', 'Morton (Sıçramalı)', 'Moore', 'Sierpinski', 'Peano']
     
     viz = CurveComparisonVisualizer()
     
     for idx, (curve_name, base_color, title) in enumerate(zip(curves, colors_map, titles)):
-        ax = axes[idx // 3, idx % 3]
+        ax = axes_flat[idx]
         ax.set_facecolor('#0a0a1a')
-        
         points = viz._get_curve_points(curve_name, 4)
         points = np.array(points)
         
         colors = plt.cm.viridis(np.linspace(0, 1, len(points)))
         ax.scatter(points[:, 0], points[:, 1], c=colors, s=10, alpha=0.8)
-        
         ax.scatter(points[0, 0], points[0, 1], color='white', s=120, marker='o', 
                   edgecolor=base_color, linewidth=2, zorder=10)
         ax.scatter(points[-1, 0], points[-1, 1], color='yellow', s=120, marker='s', 
@@ -1229,17 +1255,12 @@ def continuity_visualization_v2():
         ax.set_aspect('equal')
         ax.set_xticks([])
         ax.set_yticks([])
-        
         for spine in ax.spines.values():
             spine.set_color('#333366')
     
-    # ================================================================
-    # Boş subplot'u renk çubuğu olarak kullan
-    # ================================================================
-    ax_cbar = axes[1, 2]
+    # Renk çubuğu için 7. ekseni kullan (index 6)
+    ax_cbar = axes_flat[6]
     ax_cbar.set_facecolor('#0a0a1a')
-    
-    # Renk çubuğunu bu eksene çiz
     sm = plt.cm.ScalarMappable(cmap='viridis', norm=plt.Normalize(0, 1))
     sm.set_array([])
     cbar = fig.colorbar(sm, ax=ax_cbar, orientation='vertical', shrink=0.8)
@@ -1248,18 +1269,17 @@ def continuity_visualization_v2():
     cbar.ax.yaxis.set_tick_params(color='white')
     cbar.ax.yaxis.label.set_color('white')
     plt.setp(cbar.ax.yaxis.get_ticklabels(), color='white')
-    
-    # Renk çubuğu ekseninin kenarlıklarını gizle
     ax_cbar.set_xticks([])
     ax_cbar.set_yticks([])
     for spine in ax_cbar.spines.values():
         spine.set_visible(False)
-    
-    # Açıklama metni ekle
     ax_cbar.text(0.5, 0.8, "Renk = İlerleme", color='white', fontsize=11, 
                 ha='center', transform=ax_cbar.transAxes)
     ax_cbar.text(0.5, 0.2, "Morton: Kırmızı\nkesikli çizgiler\n= Sıçramalar", 
                 color='red', fontsize=10, ha='center', transform=ax_cbar.transAxes)
+    
+    # Son ekseni gizle
+    axes_flat[7].set_visible(False)
     
     plt.suptitle("Uzay Doldurma Eğrileri - Süreklilik Karşılaştırması", 
                 color='white', fontsize=16, fontweight='bold', y=1.02)
@@ -1269,18 +1289,21 @@ def continuity_visualization_v2():
 def radar_chart_comparison():
     """
     Eğrileri 6 farklı metrikte karşılaştıran radar grafiği
+    Metrikler: Lokalite, Süreklilik, Hesaplama Hızı, 
+               Görsel Estetik, Esneklik, Uzay Doldurma
     """
     
     categories = ['Lokalite', 'Süreklilik', 'Hesaplama\nHızı', 
                   'Görsel\nEstetik', 'Esneklik', 'Uzay\nDoldurma']
     
-    # Her eğri için 0-5 arası puanlar
+    # Her eğri için 0-5 arası puanlar (gerçekçi değerler)
     scores = {
-        'Keçeci':     [4.5, 4.0, 3.5, 5.0, 5.0, 4.0],
+        'Keçeci':     [4.0, 4.0, 3.0, 5.0, 5.0, 4.0],
         'Hilbert':    [5.0, 5.0, 4.0, 3.5, 1.0, 5.0],
         'Morton':     [3.0, 2.0, 5.0, 2.5, 1.0, 4.5],
         'Moore':      [4.5, 5.0, 4.0, 3.5, 1.0, 5.0],
         'Sierpinski': [3.5, 5.0, 3.5, 4.5, 1.0, 3.5],
+        'Peano':      [4.0, 5.0, 3.0, 3.0, 1.0, 4.5],
     }
     
     colors = {
@@ -1289,6 +1312,7 @@ def radar_chart_comparison():
         'Morton': '#44ff44',
         'Moore': '#ffff44',
         'Sierpinski': '#ff44ff',
+        'Peano': '#ff9944',
     }
     
     fig = plt.figure(figsize=(14, 12))
@@ -1334,11 +1358,11 @@ def animated_comparison():
     import matplotlib.animation as animation
     from IPython.display import HTML
     
-    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+    fig, axes = plt.subplots(2, 4, figsize=(24, 14))
     fig.patch.set_facecolor('#0a0a1a')
     
-    curves = ['Keçeci', 'Hilbert', 'Morton', 'Moore', 'Sierpinski']
-    colors = ['#ff4444', '#4488ff', '#44ff44', '#ffff44', '#ff44ff']
+    curves = ['Keçeci', 'Hilbert', 'Morton', 'Moore', 'Sierpinski', 'Peano']
+    colors = ['#ff4444', '#4488ff', '#44ff44', '#ffff44', '#ff44ff', '#ff99ff']
     viz = CurveComparisonVisualizer()
     
     # Boş subplot'u gizle
@@ -1386,12 +1410,12 @@ def indexing_performance_comparison():
     Rastgele noktaların eğri üzerindeki sıralamasını gösteren performans karşılaştırması
     """
     
-    fig, axes = plt.subplots(2, 3, figsize=(18, 12))
+    fig, axes = plt.subplots(2, 4, figsize=(24, 14))
     fig.patch.set_facecolor('#0a0a1a')
     
-    curves = ['Keçeci', 'Hilbert', 'Morton', 'Moore', 'Sierpinski']
-    titles = ['Keçeci', 'Hilbert', 'Morton (Z-Order)', 'Moore', 'Sierpinski']
-    colors = ['#ff4444', '#4488ff', '#44ff44', '#ffff44', '#ff44ff']
+    curves = ['Keçeci', 'Hilbert', 'Morton', 'Moore', 'Sierpinski', 'Peano']
+    titles = ['Keçeci', 'Hilbert', 'Morton (Z-Order)', 'Moore', 'Sierpinski', 'Peano']
+    colors = ['#ff4444', '#4488ff', '#44ff44', '#ffff44', '#ff44ff', '#ff99ff']
     
     viz = CurveComparisonVisualizer()
     
@@ -1480,8 +1504,8 @@ def locality_heatmap_both_versions():
     fig, axes = plt.subplots(2, 5, figsize=(20, 8))
     fig.patch.set_facecolor('#0a0a1a')
     
-    curves = ['Hilbert', 'Morton', 'Moore', 'Sierpinski', 'Keçeci']
-    titles = ['Hilbert', 'Morton', 'Moore', 'Sierpinski', 'Keçeci']
+    curves = ['Hilbert', 'Morton', 'Moore', 'Sierpinski', 'Keçeci', 'Peano']
+    titles = ['Hilbert', 'Morton', 'Moore', 'Sierpinski', 'Keçeci', 'Peano']
     
     viz = CurveComparisonVisualizer()
     
@@ -2001,7 +2025,7 @@ def plot_sierpinski_comparison(order: int = 3):
     
 def plot_sierpinski_curve(order: int):
     """Sierpinski eğrisini çiz"""
-    points = sierpinski_curve(order)
+    points = ClassicalCurves.sierpinski_curve(order)
     
     xs = [p[0] for p in points]
     ys = [p[1] for p in points]
@@ -2051,7 +2075,7 @@ def plot_sierpinski_evolution():
         ax = axes[idx]
         ax.set_facecolor('#0a0a1a')
         
-        points = sierpinski_curve(order)
+        points = ClassicalCurves.sierpinski_curve(order)
         xs = [p[0] for p in points]
         ys = [p[1] for p in points]
         
@@ -2077,7 +2101,7 @@ def plot_sierpinski_evolution():
     plt.suptitle("Sierpinski Eğrisi - Seviyelere Göre Gelişim", 
                 color='white', fontsize=16, fontweight='bold', y=1.02)
     plt.tight_layout()
-    plt.show()  
+    plt.show()
     
 def ciz_sierpinski(derinlik, p1, p2, p3, eksen):
     """
@@ -2153,6 +2177,35 @@ def test_sierpinski():
                 color='white', fontsize=14, y=1.02)
     plt.tight_layout()
     plt.show()
+
+def plot_peano_curve(order: int = 3):
+    """Peano eğrisini renkli gradyanla çizer."""
+    points = ClassicalCurves.peano_curve(order)
+    pts = np.array(points)
+    
+    fig, ax = plt.subplots(figsize=(10, 10))
+    fig.patch.set_facecolor('#0a0a1a')
+    ax.set_facecolor('#0a0a1a')
+    
+    colors = plt.cm.plasma(np.linspace(0, 1, len(pts)-1))
+    for i in range(len(pts)-1):
+        ax.plot(pts[i:i+2, 0], pts[i:i+2, 1], color=colors[i], linewidth=1.2)
+    
+    ax.scatter(*pts[0],  color='white', s=150, marker='o',
+               edgecolor='#ff9944', linewidth=2, zorder=5, label='Başlangıç')
+    ax.scatter(*pts[-1], color='yellow', s=150, marker='s',
+               edgecolor='#ff9944', linewidth=2, zorder=5, label='Bitiş')
+    
+    ax.set_title(f"Peano Eğrisi (order={order})\n{len(pts)} nokta",
+                 color='white', fontsize=14, fontweight='bold')
+    ax.set_aspect('equal')
+    ax.axis('off')
+    ax.legend(loc='upper right', facecolor='#1a1a3a',
+              edgecolor='white', labelcolor='white')
+    plt.tight_layout()
+    plt.show()
+
+
 
 class KececiCurveGenerator:
     """Genel amaçlı Keçeci Eğrisi üretici (2D varsayılan)"""
@@ -5505,6 +5558,91 @@ def custom_fibonacci_ordering(children: List[Tuple[float, float, float]], level:
     
     return [children[i] for i in unique_order]
 
+def peano_test(order: int = 3):
+    """Peano eğrisi doğrulama testlerini çalıştırır ve grafiğini çizer."""
+    points = ClassicalCurves.peano_curve(order)
+    pts = np.array(points)
+
+    # Grafik
+    fig, ax = plt.subplots(figsize=(10, 10))
+    fig.patch.set_facecolor('#0a0a1a')
+    ax.set_facecolor('#0a0a1a')
+    colors = plt.cm.plasma(np.linspace(0, 1, len(pts)-1))
+    for i in range(len(pts)-1):
+        ax.plot(pts[i:i+2, 0], pts[i:i+2, 1], color=colors[i], linewidth=1.2)
+    ax.scatter(*pts[0],  color='white', s=150, marker='o',
+               edgecolor='#ff9944', linewidth=2, zorder=5, label='Başlangıç')
+    ax.scatter(*pts[-1], color='yellow', s=150, marker='s',
+               edgecolor='#ff9944', linewidth=2, zorder=5, label='Bitiş')
+    ax.set_title(f"Peano Eğrisi (order={order}) – Test", color='white', fontsize=14)
+    ax.set_aspect('equal')
+    ax.axis('off')
+    ax.legend(loc='upper right', facecolor='#1a1a3a', edgecolor='white', labelcolor='white')
+    plt.tight_layout()
+    plt.show()
+
+    # Konsol testleri
+    theoretical_points = 9 ** order
+    actual_points = len(pts)
+    print(f"\n{'='*60}")
+    print(f"PEANO EĞRİSİ TESTLERİ (order={order})")
+    print(f"{'='*60}")
+    print(f"Nokta sayısı – beklenen: {theoretical_points}, gerçekleşen: {actual_points}")
+    if actual_points == theoretical_points:
+        print("✅ Nokta sayısı doğru")
+    else:
+        print("⚠️ Nokta sayısı farklı")
+
+    step_unit = 1.0 / (3 ** order)
+    diffs = np.linalg.norm(pts[1:] - pts[:-1], axis=1)
+    max_step = np.max(diffs)
+    print(f"\nSüreklilik – en büyük adım: {max_step:.6f} (birim: {step_unit:.6f})")
+    if np.allclose(diffs, step_unit):
+        print("✅ Tüm adımlar eşit – sürekli")
+    else:
+        print("❌ Kopukluk var")
+
+    x_min, x_max = pts[:,0].min(), pts[:,0].max()
+    y_min, y_max = pts[:,1].min(), pts[:,1].max()
+    expected_min = step_unit / 2.0
+    expected_max = 1.0 - step_unit / 2.0
+    print(f"\nKaplama – X:[{x_min:.6f}, {x_max:.6f}] Y:[{y_min:.6f}, {y_max:.6f}]")
+    print(f"Beklenen: [{expected_min:.6f}, {expected_max:.6f}]²")
+    if np.isclose(x_min, expected_min) and np.isclose(x_max, expected_max) and \
+       np.isclose(y_min, expected_min) and np.isclose(y_max, expected_max):
+        print("✅ Merkez‑dolaşan bölge tamamen kapsanıyor")
+    else:
+        print("⚠️ Sınırlar farklı")
+
+    from scipy.spatial import KDTree
+    tree = KDTree(pts)
+    pairs = tree.query_pairs(r=step_unit*0.3)
+    crossings = [(i,j) for i,j in pairs if abs(i-j) > 1]
+    print(f"\nKendini kesme – {len(crossings)} yakın nokta çifti (ardışık olmayan)")
+    if len(crossings) == 0:
+        print("✅ Çakışma yok")
+    else:
+        print("⚠️ Çakışmalar var")
+
+    total_length = np.sum(diffs)
+    ideal_length = (9**order - 1) * step_unit
+    print(f"\nToplam uzunluk – gerçek: {total_length:.6f}, ideal: {ideal_length:.6f}")
+    if np.isclose(total_length, ideal_length):
+        print("✅ Uzunluk ideal ile uyuşuyor")
+    else:
+        print("⚠️ Uzunluk farklı")
+
+    grid_res = min(3**order, 40)
+    counts, _, _ = np.histogram2d(pts[:,0], pts[:,1], bins=grid_res, 
+                                  range=[[expected_min, expected_max], [expected_min, expected_max]])
+    std_cell = np.std(counts)
+    print(f"\nHomojenlik – {grid_res}x{grid_res} grid, hücre std: {std_cell:.2f}")
+    if std_cell < np.mean(counts) * 0.3:
+        print("✅ Oldukça homojen")
+    else:
+        print("ℹ️ Dağılım biraz değişken")
+    print(f"{'='*60}\n")
+
 def show_menu():
     """Kullanıcı menüsü - tüm görselleştirme seçeneklerini listeler"""
     menu_options = {
@@ -5539,6 +5677,8 @@ def show_menu():
         '29': ('Dalga Fonksiyonu Çöküşü', lambda: QuantumKececiCurve().create_wave_function_collapse()),
         '30': ('Başlangıç-Bitiş Karşılaştırması', lambda: CurveComparisonVisualizer().create_start_end_comparison()),
         '31': ('Kapsamlı Karşılaştırma (Tablo)', lambda: CurveComparisonVisualizer().create_comprehensive_comparison()),
+        '32': ('Peano Eğrisi', lambda: plot_peano_curve(3)),
+        '33': ('Peano Doğrulama Testi', lambda: peano_test(3)),
         '0': ('Çıkış', None)
     }
     
@@ -5550,7 +5690,7 @@ def show_menu():
             print(f" {key:>2}. {desc}")
         print("-"*70)
         
-        choice = input("Seçiminiz (0-31): ").strip()
+        choice = input("Seçiminiz (0-32): ").strip()
         
         if choice == '0':
             print("Programdan çıkılıyor...")
