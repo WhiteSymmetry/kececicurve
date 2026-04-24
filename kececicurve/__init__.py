@@ -3,7 +3,7 @@ kececicurve - Parametric Space-Filling Curve Family
 Keçeci Eğrisi: Tamamen özgün, çok amaçlı ve esnek bir fraktal eğri üreteci.
 """
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 __author__ = "Mehmet Keçeci"
 
 from .kececicurve import (
@@ -35,6 +35,8 @@ from .kececicurve import (
     cosmic_web,
     neural_network_patterns,
     virus_patterns,
+    peano_test,
+    plot_peano_curve,
     
     # Karşılaştırma görselleştirmeleri
     locality_heatmap_comparison,
@@ -94,5 +96,7 @@ __all__ = [
     "AdvancedQuantumVisualizer",
     "QuantumKececiCurve",
     "create_kececi_curve_gallery",
+    "peano_test",
+    "plot_peano_curve",
     "show_menu",
 ]
