@@ -5690,7 +5690,7 @@ def show_menu():
             print(f" {key:>2}. {desc}")
         print("-"*70)
         
-        choice = input("Seçiminiz (0-32): ").strip()
+        choice = input("Seçiminiz (0-33): ").strip()
         
         if choice == '0':
             print("Programdan çıkılıyor...")
