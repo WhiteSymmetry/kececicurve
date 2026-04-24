@@ -107,12 +107,25 @@ Bu depo aynı zamanda Hilbert, Morton, Moore ve Sierpinski eğrilerini de içeri
   - Çiçek desenleri, galaksi sarmalları, kar taneleri, mandalalar, fraktal ağaçlar, deniz canlıları, sinir ağları, virüs kapsidleri ve kozmik ağ.
 
 - **🧩 Klasik Eğriler Desteği**
-  - Hilbert, Morton (Z‑order), Moore, Sierpinski eğrileri saf Python ile implemente edilmiştir.
+  - Hilbert, Morton (Z‑order), Moore, Sierpinski, Peano eğrileri saf Python ile implemente edilmiştir.
 
 - **⚡ Optimize Edilmiş Performans**
   - Sonuçları önbelleğe alan `KececiCurve` sınıfı sayesinde tekrarlı üretimlerde hız.
 
-## Keçeci Curve (kececicurve, Keçeci Eğrisi) <img src="example/kcd1.png" alt="Keçeci Curve (kececicurve, Keçeci Eğrisi)" align="left"/>
+### Kullanım Alanları Karşılaştırması/Usage Area Comparison
+
+| Kullanım Alanı/Usage Area                              | Keçeci    | Hilbert      | Morton      | Peano      | Moore       | Sierpinski  |
+|------------------------------------|-------------------------------|--------------|-------------|------------|-------------|-------------|
+| Veritabanı İndeksleme/Database Indexing                | ⭐⭐⭐    | ⭐⭐⭐⭐⭐   | ⭐⭐⭐⭐⭐ | ⭐⭐⭐     | ⭐⭐⭐⭐⭐  | ⭐⭐        |
+| Görüntü İşleme/Image Processing                        | ⭐⭐⭐⭐  | ⭐⭐⭐⭐⭐   | ⭐⭐⭐⭐   | ⭐⭐⭐⭐   | ⭐⭐⭐⭐⭐  | ⭐⭐        |
+| Kuantum Görselleştirme/Quantum Visualization           | ⭐⭐⭐⭐⭐| ⭐⭐         | ⭐⭐        | ⭐⭐       | ⭐⭐        | ⭐⭐        |
+| Prosedürel İçerik Üretimi/Procedural Content Generation| ⭐⭐⭐⭐⭐| ⭐⭐⭐       | ⭐⭐⭐      | ⭐⭐⭐     | ⭐⭐⭐      | ⭐⭐⭐      |
+| Bilimsel Simülasyon/Scientific Simulation              | ⭐⭐⭐⭐⭐| ⭐⭐⭐       | ⭐⭐⭐      | ⭐⭐⭐     | ⭐⭐⭐      | ⭐⭐⭐      |
+| Sanat ve Tasarım/Art & Design                          | ⭐⭐⭐⭐⭐| ⭐⭐         | ⭐          | ⭐⭐       | ⭐⭐         | ⭐⭐⭐⭐⭐ |
+| Kriptografi/Cryptography                               | ⭐⭐⭐⭐  | ⭐⭐⭐       | ⭐⭐⭐      | ⭐⭐⭐     | ⭐⭐⭐       | ⭐⭐       |
+| Yol Bulma/Pathfinding                                  | ⭐⭐⭐    | ⭐⭐⭐⭐⭐   | ⭐⭐⭐⭐    | ⭐⭐⭐⭐   | ⭐⭐⭐⭐⭐   | ⭐⭐       |
+| Eğitim ve Görselleştirme/Education & Visualization     | ⭐⭐⭐⭐⭐| ⭐⭐⭐⭐     | ⭐⭐⭐      | ⭐⭐⭐⭐   | ⭐⭐⭐⭐     | ⭐⭐⭐⭐   |
+| Harita ve CBS/GIS/Spatial Mapping                      | ⭐⭐⭐    | ⭐⭐⭐⭐⭐   | ⭐⭐⭐⭐⭐  | ⭐⭐⭐     | ⭐⭐⭐⭐⭐   | ⭐         |
 
 ---
 
