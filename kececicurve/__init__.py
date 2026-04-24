@@ -3,7 +3,7 @@ kececicurve - Parametric Space-Filling Curve Family
 Keçeci Eğrisi: Tamamen özgün, çok amaçlı ve esnek bir fraktal eğri üreteci.
 """
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 __author__ = "Mehmet Keçeci"
 
 from .kececicurve import (
