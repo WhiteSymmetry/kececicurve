@@ -1,6 +1,6 @@
 # Keçeci Curve (kececicurve, Keçeci Eğrisi)
 
-## Keçeci Curve (kececicurve, Keçeci Eğrisi) <img src="docs/logo.jpg" alt="Keçeci Curve (kececicurve, Keçeci Eğrisi)" align="right" height="140"/>
+## Keçeci Curve (kececicurve, Keçeci Eğrisi) <img src="https://github.com/WhiteSymmetry/kececicurve/blob/main/docs/logo.jpg" alt="Keçeci Curve (kececicurve, Keçeci Eğrisi)" align="right" height="140"/>
 
 [![PyPI version](https://badge.fury.io/py/kececicurve.svg)](https://badge.fury.io/py/kececicurve/)
 [![License: AGPL](https://img.shields.io/badge/License-AGPL-yellow.svg)](https://opensource.org/licenses/AGPL)
