@@ -1,6 +1,6 @@
-# kececicurve
+# Keçeci Curve (kececicurve, Keçeci Eğrisi)
 
-# Keçeci Curve (kececicurve, Keçeci Eğrisi) <img src="docs/logo.jpg" alt="Keçeci Curve (kececicurve, Keçeci Eğrisi)" align="right" height="140"/>
+## Keçeci Curve (kececicurve, Keçeci Eğrisi) <img src="docs/logo.jpg" alt="Keçeci Curve (kececicurve, Keçeci Eğrisi)" align="right" height="140"/>
 
 [![PyPI version](https://badge.fury.io/py/kececicurve.svg)](https://badge.fury.io/py/kececicurve/)
 [![License: AGPL](https://img.shields.io/badge/License-AGPL-yellow.svg)](https://opensource.org/licenses/AGPL)
@@ -112,7 +112,8 @@ Bu depo aynı zamanda Hilbert, Morton, Moore ve Sierpinski eğrilerini de içeri
 - **⚡ Optimize Edilmiş Performans**
   - Sonuçları önbelleğe alan `KececiCurve` sınıfı sayesinde tekrarlı üretimlerde hız.
 
-# Keçeci Curve (kececicurve, Keçeci Eğrisi) <img src="example/kcd1.png" alt="Keçeci Curve (kececicurve, Keçeci Eğrisi)" align="left"/>
+## Keçeci Curve (kececicurve, Keçeci Eğrisi) <img src="example/kcd1.png" alt="Keçeci Curve (kececicurve, Keçeci Eğrisi)" align="left"/>
+
 ---
 
 ## 📦 Kurulum
