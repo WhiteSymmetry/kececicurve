@@ -180,7 +180,7 @@ Bu interaktif menü, **çiçek desenlerinden kuantum algoritmalarına** kadar 30
 
 KEÇECİ CURVE GÖRSELLEŞTİRME MENÜSÜ
 ======================================================================
-  1. Çiçek Desenleri
+1. Çiçek Desenleri
   2. Galaksi Desenleri
   3. Kar Taneleri
   4. Mandala Desenleri
@@ -211,6 +211,8 @@ KEÇECİ CURVE GÖRSELLEŞTİRME MENÜSÜ
  29. Dalga Fonksiyonu Çöküşü
  30. Başlangıç-Bitiş Karşılaştırması
  31. Kapsamlı Karşılaştırma (Tablo)
+ 32. Peano Eğrisi
+ 33. Peano Doğrulama Testi
   0. Çıkış
 ----------------------------------------------------------------------
 
