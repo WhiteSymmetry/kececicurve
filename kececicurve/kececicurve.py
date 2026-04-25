@@ -1,14 +1,14 @@
 """
-# kececicurve.py: Keçeci Curve, Keçeci Eğrisi
+# kececicurve.py: Keçeci Curve, Keçeci Curve/Eğrisi
 
-Keçeci Curve (kececicurve: Keçeci Eğrisi) – Parametric Space-Filling Curve Family
+Keçeci Curve (kececicurve: Keçeci Curve/Eğrisi) – Parametric Space-Filling Curve Family
 
-Keçeci Eğrisi, uzay doldurma eğrileri ailesine yeni, tamamen özgün ve son derece esnek bir üyedir.
+Keçeci Curve/Eğrisi, SFC/Uzay Doldurma Eğrileri (UDE) ailesine yeni, tamamen özgün ve son derece esnek bir üyedir.
 Dairesel geometri, ayarlanabilir çocuk sayısı, büyüme yönü, sıralama stratejileri ve açı varyasyonları ile klasik eğrilerin ötesine geçen parametrik bir fraktal eğri üretecidir.
 
 Bu depo aynı zamanda Hilbert, Morton, Moore ve Sierpinski eğrilerini de içerir; lokalite (yerellik) karşılaştırmaları, süreklilik analizleri ve ileri kuantum fenomenlerinin (Majorana, Weyl, topolojik yarımetaller, Stratum modeli) 2B/3B görselleştirmelerini sunar.
 
-Uzay Doldurma Eğrileri - Lokalite (Yerellik) Karşılaştırması
+SFC/Uzay Doldurma Eğrileri (UDE) - Lokalite (Yerellik) Karşılaştırması
 Isı haritası ile hangi eğrinin uzamsal yakınlığı daha iyi koruduğunu gösterir
 
 Keçeci Eğrileri ile İleri Kuantum Fenomenleri Görselleştirmesi
@@ -91,7 +91,7 @@ class GrowthDirection(Enum):
 # ============================================================================
 
 class ClassicalCurves:
-    """Klasik uzay doldurma eğrilerinin implementasyonları"""
+    """Klasik SFC/Uzay Doldurma Eğrileri (UDE)nin implementasyonları"""
     
     @staticmethod
     def hilbert_curve(order: int) -> List[Tuple[float, float]]:
@@ -343,9 +343,9 @@ class CurveComparisonVisualizer:
                 ys = [p[1] for p in points]
                 ax.plot(xs, ys, '-', color=color, linewidth=2.5, alpha=0.8)
                 ax.scatter(xs[0], ys[0], color='white', s=200, marker='o', 
-                          edgecolor=color, linewidth=3, zorder=10, label='Başlangıç')
+                          edgecolor=color, linewidth=3, zorder=10, label='Start/Başlangıç')
                 ax.scatter(xs[-1], ys[-1], color='yellow', s=200, marker='s', 
-                          edgecolor=color, linewidth=3, zorder=10, label='Bitiş')
+                          edgecolor=color, linewidth=3, zorder=10, label='End/Bitiş')
                 
                 dist = np.sqrt((xs[0] - xs[-1])**2 + (ys[0] - ys[-1])**2)
                 
@@ -394,7 +394,7 @@ class CurveComparisonVisualizer:
         # Son ekseni gizle
         axes_flat[7].set_visible(False)
         
-        plt.suptitle("Uzay Doldurma Eğrilerinde Başlangıç-Bitiş İlişkisi\n"
+        plt.suptitle("SFC/Uzay Doldurma Eğrileri (UDE)nde Başlangıç-Bitiş İlişkisi\n"
                     "Moore: 1-Birim Komşu | Sierpinski: Kapalı Döngü | Peano: Açık Döngü", 
                     color='white', fontsize=16, fontweight='bold', y=0.99)
         plt.tight_layout()
@@ -442,7 +442,7 @@ class CurveComparisonVisualizer:
         
         # 8. hücre boş kalacak – otomatik görünmez.
         
-        plt.suptitle("Uzay Doldurma Eğrileri Karşılaştırması", 
+        plt.suptitle("SFC/Uzay Doldurma Eğrileri (UDE) Karşılaştırması", 
                     color='white', fontsize=18, fontweight='bold', y=0.98)
         plt.tight_layout()
         plt.show()
@@ -571,7 +571,7 @@ class CurveComparisonVisualizer:
                bbox=dict(boxstyle='round', facecolor='#1a1a3a', edgecolor='#333366'))
 
     def generate_process_comparison(self):
-        """Evrim karşılaştırması: Farklı seviyelerde eğrilerin gelişimi"""
+        """Süreç karşılaştırması: Farklı seviyelerde eğrilerin gelişimi"""
         fig, axes = plt.subplots(3, 6, figsize=(24, 16))
         fig.patch.set_facecolor('#0a0a1a')
         
@@ -608,7 +608,7 @@ class CurveComparisonVisualizer:
                     ax.set_ylabel(f"Seviye {level}", color='white', fontsize=11, 
                                  fontweight='bold', rotation=0, labelpad=30)
         
-        plt.suptitle("Uzay Doldurma Eğrilerinin Seviyelere Göre Değişimi", 
+        plt.suptitle("Space-Filling Curves (SFC) Process by Level/SFC/Uzay Doldurma Eğrileri (UDE)nin (UDE) Seviyelere Göre Değişimi", 
                     color='white', fontsize=18, fontweight='bold', y=0.99)
         
         plt.tight_layout()
@@ -616,7 +616,7 @@ class CurveComparisonVisualizer:
         
         return fig
     
-    def generate_connectivity_comparison(self):
+    def generate_locality_comparison(self):
         """Bağlantılılık karşılaştırması: Eğrilerin lokalite özellikleri"""
         fig, axes = plt.subplots(2, 4, figsize=(24, 12))   # 2x4 grid
         fig.patch.set_facecolor('#0a0a1a')
@@ -679,7 +679,7 @@ class CurveComparisonVisualizer:
         axes_flat[7].set_visible(False)
 
         plt.suptitle(
-            "Uzay Doldurma Eğrilerinde Lokalite (Yerellik) Karşılaştırması\n"
+            "SFC/Uzay Doldurma Eğrileri (UDE)nde Lokalite (Locality: Yerellik) Karşılaştırması\n"
             "Sarı çizgiler: İndeks olarak yakın noktaların uzamsal yakınlığı",
             color='white', fontsize=16, fontweight='bold', y=0.99,
         )
@@ -688,7 +688,7 @@ class CurveComparisonVisualizer:
         return fig
     
     def generate_kececi_variations(self):
-        """Keçeci Eğrisi'nin parametrik varyasyonları"""
+        """Keçeci Curve/Eğrisi'nin parametrik varyasyonları"""
         fig, axes = plt.subplots(2, 4, figsize=(20, 12))
         fig.patch.set_facecolor('#0a0a1a')
         
@@ -738,7 +738,7 @@ class CurveComparisonVisualizer:
                 spine.set_color('#333366')
                 spine.set_linewidth(0.5)
         
-        plt.suptitle("Keçeci Eğrisi'nin Parametrik Varyasyonları\n"
+        plt.suptitle("Keçeci Curve/Eğrisi'nin Keçeci Parametric Variations / Parametrik Varyasyonları\n"
                     "Çocuk sayısı, büyüme yönü, sıralama stratejisi ve seviye değişimleri", 
                     color='white', fontsize=16, fontweight='bold', y=0.99)
         
@@ -826,7 +826,7 @@ class CurveComparisonVisualizer:
         for spine in ax2.spines.values():
             spine.set_color('#333366')
         
-        plt.suptitle("Keçeci Eğrisi vs Klasik Eğriler – Nicel Karşılaştırma",
+        plt.suptitle("Keçeci Curve/Eğrisi vs Klasik Eğriler – Nicel Karşılaştırma (Detailed Radar Comparison/Detaylı Radar Karşılaştırması)",
                      color='white', fontsize=16, fontweight='bold', y=1.02)
         plt.tight_layout()
         plt.show()
@@ -867,7 +867,7 @@ class CurveComparisonVisualizer:
 # ============================================================================
 
 class KececiCurve:
-    """Optimize Keçeci Eğrisi - Sonuçları önbelleğe alır"""
+    """Optimize Keçeci Curve/Eğrisi - Sonuçları önbelleğe alır"""
     
     _cache = {}
     
@@ -1066,7 +1066,7 @@ def flower_patterns():
                     'angle_variation': 0.08, 'growth_mode': 'inward', 'ordering_mode': 'spiral'},
          'title': 'Ayçiçeği\n16 yaprak', 'color_theme': 'flower', 'special': 'center_star'},
     ]
-    quick_plot(configs, "🌺 Keçeci Eğrisi - Çiçek Desenleri", rows=2, cols=3,
+    quick_plot(configs, "🌺 Keçeci Curve/Eğrisi - Çiçek Desenleri", rows=2, cols=3,
                special_elements={'center_star': 'center_star'})
 
 
@@ -1095,7 +1095,7 @@ def galaxy_patterns():
                     'angle_variation': 0.28, 'growth_mode': 'outward', 'ordering_mode': 'spiral'},
          'title': 'Halka\n7 kol', 'color_theme': 'galaxy', 'special': 'center_white'},
     ]
-    quick_plot(configs, "🌌 Keçeci Eğrisi - Galaksi Desenleri", rows=2, cols=3, bg_color='#050510',
+    quick_plot(configs, "🌌 Keçeci Curve/Eğrisi - Galaksi Desenleri", rows=2, cols=3, bg_color='#050510',
                special_elements={'center_white': 'center_white'})
 
 
@@ -1124,7 +1124,7 @@ def snowflake_patterns():
                     'angle_variation': 0.0, 'growth_mode': 'inward', 'ordering_mode': 'sequential'},
          'title': 'Sekizgen\n8 kol', 'color_theme': 'snowflake'},
     ]
-    quick_plot(configs, "❄️ Keçeci Eğrisi - Kar Taneleri", rows=2, cols=3, bg_color='#0a0a2a')
+    quick_plot(configs, "❄️ Keçeci Curve/Eğrisi - Kar Taneleri", rows=2, cols=3, bg_color='#0a0a2a')
 
 
 # ============================================================================
@@ -1152,7 +1152,7 @@ def mandala_patterns():
                     'angle_variation': 0.0, 'growth_mode': 'outward', 'ordering_mode': 'sequential'},
          'title': '5 Katlı\nBasit', 'color_theme': 'mandala', 'xlim': [-2.5, 2.5], 'ylim': [-2.5, 2.5]},
     ]
-    quick_plot(configs, "🕉️ Keçeci Eğrisi - Mandala Desenleri", rows=2, cols=3, bg_color='#1a0a1a')
+    quick_plot(configs, "🕉️ Keçeci Curve/Eğrisi - Mandala Desenleri", rows=2, cols=3, bg_color='#1a0a1a')
 
 
 # ============================================================================
@@ -1186,7 +1186,7 @@ def fractal_trees():
                     'angle_offset': -np.pi/2},
          'title': 'Bonsai\nİçe', 'color_theme': 'tree', 'special': 'leaf_points', 'linewidth': 2.0},
     ]
-    quick_plot(configs, "🌳 Keçeci Eğrisi - Fraktal Ağaçlar", rows=2, cols=3, bg_color='#0a1a0a',
+    quick_plot(configs, "🌳 Keçeci Curve/Eğrisi - Fraktal Ağaçlar", rows=2, cols=3, bg_color='#0a1a0a',
                special_elements={'leaf_points': 'leaf_points'})
 
 
@@ -1215,7 +1215,7 @@ def marine_patterns():
                     'angle_variation': 0.12, 'growth_mode': 'inward', 'ordering_mode': 'spiral'},
          'title': 'Deniz Kabuğu\n4 kol', 'color_theme': 'marine'},
     ]
-    quick_plot(configs, "🐠 Keçeci Eğrisi - Deniz Canlıları", rows=2, cols=3, bg_color='#0a1a2a')
+    quick_plot(configs, "🐠 Keçeci Curve/Eğrisi - Deniz Canlıları", rows=2, cols=3, bg_color='#0a1a2a')
 
 
 # ============================================================================
@@ -1234,7 +1234,7 @@ def cosmic_web():
                     'angle_variation': 0.45, 'growth_mode': 'tangent', 'ordering_mode': 'reverse_spiral'},
          'title': 'Süperküme\nBüyük ölçek', 'color_theme': 'cosmic', 'xlim': [-3, 3], 'ylim': [-3, 3]},
     ]
-    quick_plot(configs, "🌠 Keçeci Eğrisi - Kozmik Ağ", rows=1, cols=3, bg_color='#020208')
+    quick_plot(configs, "🌠 Keçeci Curve/Eğrisi - Kozmik Ağ", rows=1, cols=3, bg_color='#020208')
 
 
 # ============================================================================
@@ -1262,7 +1262,7 @@ def neural_network_patterns():
                     'angle_variation': 0.06, 'growth_mode': 'inward', 'ordering_mode': 'alternating'},
          'title': 'Tam Bağlı\n16 bağlantı', 'color_theme': 'neural', 'special': 'neuron_nodes'},
     ]
-    quick_plot(configs, "🧠 Keçeci Eğrisi - Yapay Sinir Ağı", rows=2, cols=3, bg_color='#0a0a1a',
+    quick_plot(configs, "🧠 Keçeci Curve/Eğrisi - Yapay Sinir Ağı", rows=2, cols=3, bg_color='#0a0a1a',
                special_elements={'neuron_nodes': 'neuron_nodes'})
 
 
@@ -1291,7 +1291,7 @@ def virus_patterns():
                     'angle_variation': 0.1, 'growth_mode': 'inward', 'ordering_mode': 'spiral'},
          'title': 'Bakteriyofaj\n5 kat', 'color_theme': 'virus', 'xlim': [-2.3, 2.3], 'ylim': [-2.3, 2.3]},
     ]
-    quick_plot(configs, "🦠 Keçeci Eğrisi - Virüs Kapsid Desenleri", rows=2, cols=3, bg_color='#1a0a0a')
+    quick_plot(configs, "🦠 Keçeci Curve/Eğrisi - Virüs Kapsid Desenleri", rows=2, cols=3, bg_color='#1a0a0a')
     
 # ============================================================================
 # KARŞILAŞTIRMA VERİLERİ
@@ -1418,7 +1418,7 @@ def locality_heatmap_comparison():
     cbar_ax.tick_params(colors='white')
     cbar_ax.yaxis.label.set_color('white')
     
-    plt.suptitle("Uzay Doldurma Eğrileri - Lokalite Karşılaştırması\n"
+    plt.suptitle("SFC/Uzay Doldurma Eğrileri (UDE) - Lokalite Karşılaştırması\n"
                 "Koyu yeşil: İndeks yakınlığı = Uzamsal yakınlık (İYİ)\n"
                 "Kırmızı: İndeks yakın ama uzamsal uzak (KÖTÜ)", 
                 color='white', fontsize=14, fontweight='bold', y=1.02)
@@ -1459,9 +1459,9 @@ def continuity_visualization():
         
         # Başlangıç ve bitiş
         ax.scatter(points[0, 0], points[0, 1], color='white', s=150, marker='o', 
-                  edgecolor=base_color, linewidth=3, zorder=10, label='Başlangıç')
+                  edgecolor=base_color, linewidth=3, zorder=10, label='Start/Başlangıç')
         ax.scatter(points[-1, 0], points[-1, 1], color='yellow', s=150, marker='s', 
-                  edgecolor=base_color, linewidth=3, zorder=10, label='Bitiş')
+                  edgecolor=base_color, linewidth=3, zorder=10, label='End/Bitiş')
         
         # Morton için sıçrama noktalarını işaretle
         if curve_name == 'Morton':
@@ -1507,7 +1507,7 @@ def continuity_visualization():
     cbar_ax.tick_params(colors='white')
     cbar_ax.yaxis.label.set_color('white')
     
-    plt.suptitle("Uzay Doldurma Eğrileri - Süreklilik ve İlerleme Yönü\n"
+    plt.suptitle("SFC/Uzay Doldurma Eğrileri (UDE) - Süreklilik ve İlerleme Yönü\n"
                 "Morton: Ani renk değişimleri = Sıçramalar (kırmızı kesikli çizgiler)", 
                 color='white', fontsize=14, fontweight='bold', y=1.02)
     plt.tight_layout(rect=[0, 0, 0.9, 0.95])
@@ -1578,7 +1578,7 @@ def continuity_visualization_v2():
     # Son ekseni gizle
     axes_flat[7].set_visible(False)
     
-    plt.suptitle("Uzay Doldurma Eğrileri - Süreklilik Karşılaştırması", 
+    plt.suptitle("SFC/SFC/Uzay Doldurma Eğrileri (UDE) - Continuity Visualization / Süreklilik Görselleştirmesi", 
                 color='white', fontsize=16, fontweight='bold', y=1.02)
     plt.tight_layout()
     plt.show()
@@ -1642,7 +1642,7 @@ def radar_chart_comparison():
                       fontsize=11, title='Eğri Tipi', title_fontsize=12)
     legend.get_title().set_color('white')
     
-    plt.suptitle("Uzay Doldurma Eğrileri - Çok Boyutlu Karşılaştırma\n"
+    plt.suptitle("SFC/Uzay Doldurma Eğrileri (UDE) - Çok Boyutlu Karşılaştırma\n"
                 "Keçeci: En yüksek esneklik ve görsel estetik", 
                 color='white', fontsize=16, fontweight='bold', y=1.02)
     plt.tight_layout()
@@ -1694,7 +1694,7 @@ def animated_comparison():
             for spine in ax.spines.values():
                 spine.set_color('#333366')
         
-        plt.suptitle(f"Uzay Doldurma Eğrileri - Gelişim Animasyonu (Seviye {level}/4)", 
+        plt.suptitle(f"SFC/Uzay Doldurma Eğrileri (UDE) - Gelişim Animasyonu (Seviye {level}/4)", 
                     color='white', fontsize=16, fontweight='bold', y=1.02)
     
     ani = animation.FuncAnimation(fig, update, frames=4, interval=1500, repeat=True)
@@ -1706,42 +1706,50 @@ def indexing_performance_comparison():
     """
     Rastgele noktaların eğri üzerindeki sıralamasını gösteren performans karşılaştırması
     """
-    
-    fig, axes = plt.subplots(2, 4, figsize=(24, 14))
+    fig, axes = plt.subplots(2, 3, figsize=(24, 14))
     fig.patch.set_facecolor('#0a0a1a')
     
     curves = ['Keçeci', 'Hilbert', 'Morton', 'Moore', 'Sierpinski', 'Peano']
     titles = ['Keçeci', 'Hilbert', 'Morton (Z-Order)', 'Moore', 'Sierpinski', 'Peano']
-    colors = ['#ff4444', '#4488ff', '#44ff44', '#ffff44', '#ff44ff', '#ff99ff']
+    colors = ['#ff4444', '#4488ff', '#44ff44', '#ffff44', '#ff44ff', '#ff9944']
     
     viz = CurveComparisonVisualizer()
     
-    # Rastgele noktalar oluştur
+    # Rastgele noktalar – tüm eğrilerin ortak alanına uygun
     np.random.seed(42)
     n_points = 30
-    random_points = np.random.uniform(-1, 1, (n_points, 2))
+    random_points = np.random.uniform(-1.5, 1.5, (n_points, 2))  # biraz genişletildi
     
     for idx, (curve_name, title, color) in enumerate(zip(curves, titles, colors)):
         ax = axes[idx // 3, idx % 3]
         ax.set_facecolor('#0a0a1a')
         
-        # Eğriyi arka planda çiz
+        # Eğri noktalarını al ve normalize et
         curve_points = viz._get_curve_points(curve_name, 4)
         curve_points = np.array(curve_points)
-        ax.plot(curve_points[:, 0], curve_points[:, 1], '-', color=color, 
-               linewidth=1, alpha=0.3)
         
-        # Rastgele noktaları eğri üzerinde sırala
-        # (En yakın eğri noktasını bularak)
+        # Tüm eğrileri [-2, 2] × [-2, 2] aralığına ölçekle
+        min_vals = curve_points.min(axis=0)
+        max_vals = curve_points.max(axis=0)
+        range_vals = max_vals - min_vals
+        scale = range_vals.max()
+        if scale == 0:
+            scale = 1.0
+        curve_norm = (curve_points - min_vals) / scale * 4 - 2   # [-2, 2] aralığı
+        
+        # Arka plan eğrisi
+        ax.plot(curve_norm[:, 0], curve_norm[:, 1], '-', color=color, 
+                linewidth=1, alpha=0.3)
+        
+        # Rastgele noktaları normalize edilmiş eğri üzerinde sırala
         order = []
         for rp in random_points:
-            distances = np.linalg.norm(curve_points - rp, axis=1)
+            distances = np.linalg.norm(curve_norm - rp, axis=1)
             nearest_idx = np.argmin(distances)
             order.append(nearest_idx)
         
         sorted_indices = np.argsort(order)
         
-        # Noktaları sıralı olarak çiz
         for i, idx in enumerate(sorted_indices):
             ax.scatter(random_points[idx, 0], random_points[idx, 1], 
                       c=plt.cm.viridis(i/n_points), s=80, 
@@ -1750,17 +1758,17 @@ def indexing_performance_comparison():
                        color='white', fontsize=8, ha='center', va='center')
         
         ax.set_title(f"{title}\nNoktalar eğri sırasına göre numaralandırıldı", 
-                    color='white', fontsize=11)
+                    color='white', fontsize=10)
         ax.set_aspect('equal')
         ax.set_xticks([])
         ax.set_yticks([])
+        ax.set_xlim(-2.5, 2.5)
+        ax.set_ylim(-2.5, 2.5)
         
         for spine in ax.spines.values():
             spine.set_color('#333366')
     
-    axes[1, 2].set_visible(False)
-    
-    plt.suptitle("Uzay Doldurma Eğrileri - Veri İndeksleme Karşılaştırması\n"
+    plt.suptitle("SFC/Uzay Doldurma Eğrileri (UDE) – Veri İndeksleme Karşılaştırması\n"
                 "Aynı rastgele noktalar, her eğrinin kendi sıralamasına göre numaralandırıldı", 
                 color='white', fontsize=14, fontweight='bold', y=1.02)
     plt.tight_layout()
@@ -2393,7 +2401,7 @@ def locality_combined(order=4, n_fractions=50):
 
 def demonstrate_num_children_effect():
     """
-    Farklı çocuk sayılarının Keçeci Eğrisi üzerindeki etkisini gösterir
+    Farklı çocuk sayılarının Keçeci Curve/Eğrisi üzerindeki etkisini gösterir
     """
     fig, axes = plt.subplots(2, 4, figsize=(20, 10))
     fig.patch.set_facecolor('#0a0a1a')
@@ -2445,8 +2453,8 @@ def demonstrate_num_children_effect():
         for spine in ax.spines.values():
             spine.set_color('#333366')
     
-    plt.suptitle("Keçeci Eğrisi - Çocuk Sayısının Şekil Üzerindeki Etkisi\n"
-                "2: Çizgi | 3: Üçgen | 4: Kare | 5: Beşgen | 6: Altıgen | 7: Yedigen | 8: Sekizgen", 
+    plt.suptitle("Keçeci Curve/Eğrisi - Effect of Child Count / Çocuk Sayısının Etkisi\n"
+                "2: Çizgi | 3: Üçgen | 4: Kare | 5: Beşgen | 6: Altıgen | 7: Yedigen | 8: Sekizgen | 10: Ongen", 
                 color='white', fontsize=14, fontweight='bold', y=1.02)
     plt.tight_layout()
     plt.show()
@@ -2504,7 +2512,7 @@ def demonstrate_growth_mode_effect():
         ax.set_xlim(x_min, x_max)
         ax.set_ylim(y_min, y_max)
 
-    plt.suptitle("Keçeci Eğrisi – Büyüme Modunun Etkisi (Aynı Ölçek)",
+    plt.suptitle("Keçeci Curve/Eğrisi – Effect of Growth Mode / Büyüme Modunun Etkisi (Aynı Ölçek)",
                  color='white', fontsize=16, fontweight='bold', y=1.02)
     plt.tight_layout()
     plt.show()
@@ -2568,7 +2576,7 @@ def demonstrate_ordering_mode_effect():
     for idx in range(len(ordering_modes), 6):
         axes[idx // 3, idx % 3].set_visible(False)
     
-    plt.suptitle("Keçeci Eğrisi - Sıralama Stratejisinin Etkisi", 
+    plt.suptitle("Keçeci Curve/Eğrisi - ffect of Ordering Strategy / Sıralama Stratejisinin Etkisi", 
                 color='white', fontsize=14, fontweight='bold', y=1.02)
     plt.tight_layout()
     plt.show()
@@ -2614,7 +2622,7 @@ def demonstrate_scale_factor_effect():
         for spine in ax.spines.values():
             spine.set_color('#333366')
     
-    plt.suptitle("Keçeci Eğrisi - Ölçek Faktörünün Etkisi\n"
+    plt.suptitle("Keçeci Curve/Eğrisi - Effect of Scale Factor / Ölçek Faktörünün Etkisi\n"
                 "Düşük değer: Sıkı paketlenmiş | Yüksek değer: Dağınık", 
                 color='white', fontsize=14, fontweight='bold', y=1.05)
     plt.tight_layout()
@@ -2677,7 +2685,7 @@ def demonstrate_angle_effects():
         for spine in ax.spines.values():
             spine.set_color('#333366')
     
-    plt.suptitle("Keçeci Eğrisi - Açı Parametrelerinin Etkisi\n"
+    plt.suptitle("Keçeci Curve/Eğrisi - Effect of Angle Parameters / Açı Parametrelerinin Etkisi\n"
                 "angle_offset: Eğriyi döndürür | angle_variation: Seviyeler arası kıvrım ekler", 
                 color='white', fontsize=14, fontweight='bold', y=1.02)
     plt.tight_layout()
@@ -2826,7 +2834,7 @@ def plot_sierpinski_comparison(order: int = 3):
         for spine in ax.spines.values():
             spine.set_color('#333366')
     
-    plt.suptitle(f"Sierpinski Çizim Tipleri (order={order})", 
+    plt.suptitle(f"Sierpinski Çizim Tipleri: Sierpinski Comparison / Sierpinski Karşılaştırması (order={order})", 
                 color='white', fontsize=14, fontweight='bold', y=1.02)
     plt.tight_layout()
     plt.show()
@@ -2847,16 +2855,16 @@ def plot_sierpinski_curve(order: int):
     
     # Başlangıç ve bitiş noktaları
     ax.scatter(xs[0], ys[0], color='white', s=150, marker='o', 
-              edgecolor='#ff44ff', linewidth=2, zorder=5, label='Başlangıç')
+              edgecolor='#ff44ff', linewidth=2, zorder=5, label='Start/Başlangıç')
     ax.scatter(xs[-1], ys[-1], color='yellow', s=150, marker='s', 
-              edgecolor='#ff44ff', linewidth=2, zorder=5, label='Bitiş')
+              edgecolor='#ff44ff', linewidth=2, zorder=5, label='End/Bitiş')
     
     # Kapalı döngü kontrolü
     dist = np.sqrt((xs[0] - xs[-1])**2 + (ys[0] - ys[-1])**2)
-    status = "✅ Kapalı Döngü" if dist < 0.1 else "❌ Açık"
+    status = "✅ Closed-Loop/Kapalı Döngü" if dist < 0.1 else "❌ Open-Loop/Açık Döngü"
     
-    ax.set_title(f"Sierpinski Eğrisi (order={order})\n"
-                 f"Nokta sayısı: {len(points)} | {status}", 
+    ax.set_title(f"Sierpinski Curve/Eğrisi (order={order})\n"
+                 f"Number of dots/Nokta sayısı: {len(points)} | {status}", 
                 color='white', fontsize=14, fontweight='bold')
     ax.set_aspect('equal')
     ax.set_xticks([])
@@ -2906,7 +2914,7 @@ def plot_sierpinski_process():
         for spine in ax.spines.values():
             spine.set_color('#333366')
     
-    plt.suptitle("Sierpinski Eğrisi - Seviyelere Göre Gelişim", 
+    plt.suptitle("Sierpinski Curve/Eğrisi - Sierpinski Process by Level / Seviyelere Göre Sierpinski Süreci", 
                 color='white', fontsize=16, fontweight='bold', y=1.02)
     plt.tight_layout()
     plt.show()
@@ -2961,7 +2969,7 @@ def plot_sierpinski_triangle(derinlik: int = 4):
     ax.set_ylim(-0.2, h + 0.2)
     ax.set_aspect('equal')
     ax.axis('off')
-    ax.set_title(f"Sierpinski Üçgeni (derinlik={derinlik})", color='white')
+    ax.set_title(f"Sierpinski Triangle/Üçgeni (depth/derinlik={derinlik})", color='white')
     plt.tight_layout()
     plt.show()
     
@@ -2986,15 +2994,15 @@ def test_sierpinski():
         
         # Başlangıç ve bitiş
         ax.scatter(xs[0], ys[0], color='white', s=150, marker='o', 
-                  edgecolor='#ff44ff', linewidth=2, zorder=5, label='Başlangıç')
+                  edgecolor='#ff44ff', linewidth=2, zorder=5, label='Start/Başlangıç')
         ax.scatter(xs[-1], ys[-1], color='yellow', s=150, marker='s', 
-                  edgecolor='#ff44ff', linewidth=2, zorder=5, label='Bitiş')
+                  edgecolor='#ff44ff', linewidth=2, zorder=5, label='End/Bitiş')
         
         # Başlangıç ve bitiş aynı mı?
         dist = np.sqrt((xs[0] - xs[-1])**2 + (ys[0] - ys[-1])**2)
-        status = "Kapalı Döngü" if dist < 0.01 else "❌ Açık"
+        status = "Closed-Loop/Kapalı Döngü" if dist < 0.01 else "❌ Oepn/Açık"
         
-        ax.set_title(f"Sierpinski Eğrisi (order={order})\n{status}", 
+        ax.set_title(f"Sierpinski Curve/Eğrisi (order={order})\n{status}", 
                     color='white', fontsize=12)
         ax.set_aspect('equal')
         ax.set_xticks([])
@@ -3007,7 +3015,7 @@ def test_sierpinski():
             ax.legend(loc='upper right', facecolor='#1a1a3a',
                      edgecolor='white', labelcolor='white')
     
-    plt.suptitle("Sierpinski Eğrisi - Doğru Implementasyon", 
+    plt.suptitle("Sierpinski Curve/Eğrisi", 
                 color='white', fontsize=14, y=1.02)
     plt.tight_layout()
     plt.show()
@@ -3026,11 +3034,11 @@ def plot_peano_curve(order: int = 3):
         ax.plot(pts[i:i+2, 0], pts[i:i+2, 1], color=colors[i], linewidth=1.2)
     
     ax.scatter(*pts[0],  color='white', s=150, marker='o',
-               edgecolor='#ff9944', linewidth=2, zorder=5, label='Başlangıç')
+               edgecolor='#ff9944', linewidth=2, zorder=5, label='Start/Başlangıç')
     ax.scatter(*pts[-1], color='yellow', s=150, marker='s',
-               edgecolor='#ff9944', linewidth=2, zorder=5, label='Bitiş')
+               edgecolor='#ff9944', linewidth=2, zorder=5, label='End/Bitiş')
     
-    ax.set_title(f"Peano Eğrisi (order={order})\n{len(pts)} nokta",
+    ax.set_title(f"Peano Curve/Eğrisi (order={order})\n{len(pts)} dot/nokta",
                  color='white', fontsize=14, fontweight='bold')
     ax.set_aspect('equal')
     ax.axis('off')
@@ -3042,7 +3050,7 @@ def plot_peano_curve(order: int = 3):
 
 
 class KececiCurveGenerator:
-    """Genel amaçlı Keçeci Eğrisi üretici (2D varsayılan)"""
+    """Genel amaçlı Keçeci Curve/Eğrisi üretici (2D varsayılan)"""
     def __init__(
         self,
         num_children: int = 6,
@@ -3211,7 +3219,7 @@ class KececiCurveGenerator:
         return children
 """
 class KececiCurveGenerator:
-    #Parametrik Keçeci Eğrisi üreteci (2B)
+    #Parametrik Keçeci Curve/Eğrisi üreteci (2B)
     
     def __init__(
         self,
@@ -3360,7 +3368,7 @@ class KececiCurveGenerator:
 # ============================================================================
 
 class KececiCurveGenerator3D:
-    """Gelişmiş 3B Keçeci Eğrisi üreteci"""
+    """Gelişmiş 3B Keçeci Curve/Eğrisi üreteci"""
     
     def __init__(
         self,
@@ -3516,7 +3524,7 @@ class KececiCurveGenerator3D:
 # ============================================================================
 
 class KececiCurveGenerator2D:
-    """2B Keçeci Eğrisi üreteci"""
+    """2B Keçeci Curve/Eğrisi üreteci"""
     
     def __init__(
         self,
@@ -3585,7 +3593,7 @@ class KececiCurveGenerator2D:
 # ============================================================================
 
 class MajoranaVisualizer:
-    """Majorana fermiyonları için Keçeci Eğrisi görselleştiricisi"""
+    """Majorana fermiyonları için Keçeci Curve/Eğrisi görselleştiricisi"""
     
     def visualize_majorana_zero_modes(self):
         """
@@ -3882,7 +3890,7 @@ class MajoranaVisualizer:
         
         for pos, color in zip(positions, colors):
             gen = KececiCurveGenerator3D(
-                num_children=6, max_level=2, scale_factor=0.25, base_radius=0.15,
+                num_children=5, max_level=2, scale_factor=0.25, base_radius=0.15,
                 color_by_angle=True, alpha=0.8, growth_mode='majorana'
             )
             gen.generate_curve(center=pos)
@@ -3989,7 +3997,7 @@ class WeylVisualizer:
             ax.plot_surface(X, Y, Z, color=color, alpha=0.3)
             ax.plot_surface(X, Y, -Z, color=color, alpha=0.3)
             
-            # Keçeci eğrisi ile Weyl noktasını vurgula
+            # Keçeci Curve/Eğrisi ile Weyl noktasını vurgula
             gen = KececiCurveGenerator3D(
                 num_children=10, max_level=2, scale_factor=0.25, base_radius=0.2,
                 color_by_angle=True, alpha=0.9, growth_mode='spiral',
@@ -4152,7 +4160,7 @@ class WeylVisualizer:
                  U[::2, ::2], V[::2, ::2], W[::2, ::2],
                  color='cyan', alpha=0.6, length=0.3)
         
-        # Keçeci eğrisi ile Weyl noktası
+        # Keçeci Curve/Eğrisi ile Weyl noktası
         gen = KececiCurveGenerator3D(
             num_children=12, max_level=2, scale_factor=0.2, base_radius=0.2,
             color_by_angle=True, alpha=0.8
@@ -4193,7 +4201,7 @@ class WeylVisualizer:
             color = '#ff4444' if chirality > 0 else '#4444ff'
             
             gen = KececiCurveGenerator3D(
-                num_children=6, max_level=2, scale_factor=0.2, base_radius=0.12,
+                num_children=5, max_level=2, scale_factor=0.2, base_radius=0.12,
                 color_by_angle=True, alpha=0.7, chirality=chirality
             )
             gen.generate_curve(center=(x, y, z))
@@ -4326,7 +4334,7 @@ class StratumModelVisualizer:
                 y = r * np.sin(angle)
                 
                 gen = KececiCurveGenerator3D(
-                    num_children=6, max_level=2, scale_factor=0.2, base_radius=0.15,
+                    num_children=5, max_level=2, scale_factor=0.2, base_radius=0.15,
                     color_by_angle=True, alpha=0.8, growth_mode='outward'
                 )
                 gen.generate_curve(center=(x, y, z))
@@ -4407,7 +4415,7 @@ class StratumModelVisualizer:
             
             # Uçlarda Majorana modları
             gen = KececiCurveGenerator3D(
-                num_children=6, max_level=2, scale_factor=0.2, base_radius=0.12,
+                num_children=5, max_level=2, scale_factor=0.2, base_radius=0.12,
                 color_by_angle=True, alpha=0.8, growth_mode='majorana'
             )
             gen.generate_curve(center=(x, y, 0))
@@ -4573,7 +4581,7 @@ class StratumModelVisualizer:
             py = r * np.sin(angle)
             
             gen = KececiCurveGenerator2D(
-                num_children=6, max_level=2, scale_factor=0.2, base_radius=0.25,
+                num_children=5, max_level=2, scale_factor=0.2, base_radius=0.25,
                 color_by_angle=True, line_width=1.2
             )
             gen.generate_curve(center=(px, py))
@@ -4663,7 +4671,7 @@ class Rich3DQuantumVisualizer:
             for level in np.linspace(Z.min(), Z.max(), 5):
                 if level > Z.min() + 0.1 * (Z.max() - Z.min()):
                     generator = KececiCurveGenerator3D(
-                        num_children=6, max_level=2, scale_factor=0.3, base_radius=0.15,
+                        num_children=5, max_level=2, scale_factor=0.3, base_radius=0.15,
                         color_by_angle=True, alpha=0.6, growth_mode='spiral'
                     )
                     # Kontur üzerinde bir nokta seç
@@ -4757,7 +4765,7 @@ class Rich3DQuantumVisualizer:
             
             qubit_positions.append((x, y, z))
         
-        # Her kübit için Keçeci eğrisi
+        # Her kübit için Keçeci Curve/Eğrisi
         for i, pos in enumerate(qubit_positions):
             generator = KececiCurveGenerator3D(
                 num_children=5, max_level=2, scale_factor=0.25, base_radius=0.2,
@@ -4785,7 +4793,7 @@ class Rich3DQuantumVisualizer:
             for j in range(i+1, n_qubits):
                 strength = entanglement_matrix[i, j]
                 if strength > 0.15:
-                    # Dolanıklık bağlantısı için Keçeci eğrisi
+                    # Dolanıklık bağlantısı için Keçeci Curve/Eğrisi
                     p1 = np.array(qubit_positions[i])
                     p2 = np.array(qubit_positions[j])
                     
@@ -4833,10 +4841,10 @@ class Rich3DQuantumVisualizer:
     # 3. ADIABATİK KUANTUM EVRİMİ
     # --------------------------------------------------------------------------
     
-    def visualize_adiabatic_evolution_3d(self):
+    def visualize_adiabatic_process_3d(self):
         """
-        Keçeci 3B Eğrileri ile Adiabatik Kuantum Evrimi
-        Keçeci 3D Curves: Adiabatic Quantum Evolution
+        Keçeci 3B Eğrileri ile Adiabatik Kuantum Süreci
+        Keçeci 3D Curves: Adiabatic Quantum Process
         
         Hamiltonyen'in yavaşça değiştiği adiabatik süreç.
         """
@@ -4870,7 +4878,7 @@ class Rich3DQuantumVisualizer:
                 direction = vec / np.linalg.norm(vec)
                 
                 generator = KececiCurveGenerator3D(
-                    num_children=6, max_level=2, scale_factor=0.3, base_radius=radius*0.3,
+                    num_children=5, max_level=2, scale_factor=0.3, base_radius=radius*0.3,
                     color_by_level=True, alpha=0.7, growth_mode='spiral',
                     angle_offset=i * 2*np.pi/3
                 )
@@ -4905,7 +4913,7 @@ class Rich3DQuantumVisualizer:
             ax.axis('off')
             ax.view_init(elev=25, azim=45 + s*90)
         
-        plt.suptitle("Keçeci 3D Curves: Adiabatic Quantum Evolution", 
+        plt.suptitle("Keçeci 3D Curves: Adiabatic Quantum Process", 
                     color='white', fontsize=16, y=0.98)
         plt.tight_layout()
         plt.show()
@@ -4950,7 +4958,7 @@ class Rich3DQuantumVisualizer:
                 y = (r_base + 0.3 * np.sin(t_values)) * np.sin(t_values/2 + angle_offset)
                 z = t_values / 2 - 2
                 
-                # Keçeci eğrisi ile süsle
+                # Keçeci Curve/Eğrisi ile süsle
                 for j in range(0, len(t_values), 15):
                     generator = KececiCurveGenerator3D(
                         num_children=4, max_level=1, scale_factor=0.25, base_radius=0.08,
@@ -5009,7 +5017,7 @@ class Rich3DQuantumVisualizer:
         omega = np.exp(2j * np.pi / N)
         QFT = np.array([[omega**(j*k) for k in range(N)] for j in range(N)]) / np.sqrt(N)
         
-        # Her baz durumu için Keçeci eğrisi
+        # Her baz durumu için Keçeci Curve/Eğrisi
         for j in range(N):
             # Genlik ve faz
             amplitudes = np.abs(QFT[j])
@@ -5080,7 +5088,7 @@ class Rich3DQuantumVisualizer:
 # ============================================================================
 
 class AdvancedQuantumVisualizer:
-    """İleri kuantum hesaplamaları için Keçeci Eğrisi görselleştiricisi"""
+    """İleri kuantum hesaplamaları için Keçeci Curve/Eğrisi görselleştiricisi"""
     
     def __init__(self):
         self.figures = []
@@ -5184,7 +5192,7 @@ class AdvancedQuantumVisualizer:
                 
                 for i in range(len(xs) - 1):
                     point = generator3d.all_points[i]
-                    seg_color = generator3d._get_color(point[2])
+                    seg_color = generator3d._get_color(point[1], point[2])
                     ax.plot(xs[i:i+2], ys[i:i+2], zs[i:i+2], 
                            color=seg_color, linewidth=1.5, alpha=0.7)
             
@@ -5203,7 +5211,7 @@ class AdvancedQuantumVisualizer:
         self.figures.append(fig)
     
     # --------------------------------------------------------------------------
-    # 2. SHOR ALGORİTMASI (DÜZELTİLMİŞ)
+    # 2. SHOR ALGORİTMASI
     # --------------------------------------------------------------------------
     
     def visualize_shor_algorithm(self, N: int = 15, a: int = 7):
@@ -5247,7 +5255,7 @@ class AdvancedQuantumVisualizer:
         for cycle in range(3):
             offset = cycle * period
             generator = KececiCurveGenerator(
-                num_children=6, max_level=3, scale_factor=0.3, base_radius=0.6,
+                num_children=5, max_level=3, scale_factor=0.3, base_radius=0.6,
                 child_ordering=ChildOrdering.SPIRAL_OUTWARD,
                 angle_offset=offset * 2*np.pi/period,
                 color_by_level=True, line_width=1.2, show_points=True, alpha=0.8
@@ -5481,7 +5489,7 @@ class AdvancedQuantumVisualizer:
             ax.set_facecolor('#0a0a1a')
             ax.axis('off')
         
-        # Genlik evrimi (alt kısım)
+        # Genlik süreci (alt kısım)
         ax_ev = plt.subplot(2, 1, 2)
         ax_ev.set_facecolor('#0a0a1a')
         
@@ -5492,7 +5500,7 @@ class AdvancedQuantumVisualizer:
         ax_ev.plot(iterations, target_amps, 'lime', linewidth=3, label='Target Probability')
         ax_ev.axvline(x=optimal_iterations, color='yellow', linestyle='--', alpha=0.5)
         
-        ax_ev.set_title("Keçeci Curves: Amplitude Evolution", color='white')
+        ax_ev.set_title("Keçeci Curves: Amplitude Process", color='white')
         ax_ev.set_xlabel("Iteration", color='white')
         ax_ev.set_ylabel("Probability", color='white')
         ax_ev.legend()
@@ -5764,7 +5772,7 @@ class AdvancedQuantumVisualizer:
     
     def _draw_phase_flip_code(self, ax):
         for i in range(3):
-            g = KececiCurveGenerator(num_children=6, max_level=3, scale_factor=0.22, base_radius=0.2,
+            g = KececiCurveGenerator(num_children=5, max_level=3, scale_factor=0.22, base_radius=0.2,
                                      angle_offset=i*np.pi/3, color_by_angle=True,
                                      line_color=plt.cm.plasma(i/3), line_width=1.2)
             x = i * 1.0 - 1.0
@@ -5867,7 +5875,7 @@ class QuantumKececiCurve:
             ax.set_facecolor('#0a0a1a')
             
             generator = KececiCurveGenerator(
-                num_children=6 + state_idx * 2,
+                num_children=5 + state_idx * 2,
                 max_level=4,
                 scale_factor=0.45,
                 base_radius=3.5,
@@ -5896,7 +5904,7 @@ class QuantumKececiCurve:
         
         for state_idx in range(num_states):
             generator = KececiCurveGenerator(
-                num_children=6 + state_idx * 2,
+                num_children=5 + state_idx * 2,
                 max_level=4,
                 scale_factor=0.45,
                 base_radius=3.5,
@@ -6017,14 +6025,15 @@ class QuantumKececiCurve:
         self.figures.append(fig)
     
     def generate_quantum_tunneling(self):
-        """Kuantum tünelleme"""
-        fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+        """Quantum Tunneling / Kuantum Tünelleme"""
+        fig, axes = plt.subplots(1, 3, figsize=(18, 9))
         fig.patch.set_facecolor('#0a0a1a')
         
+        # İki dilli senaryo adları
         scenarios = [
-            (0.3, 1.0, "Düşük Enerji"),
-            (0.7, 1.0, "Rezonans"),
-            (1.2, 1.0, "Bariyer Üstü")
+            (0.3, 1.0, "Low Energy / Düşük Enerji"),
+            (0.7, 1.0, "Resonance / Rezonans"),
+            (1.2, 1.0, "Above Barrier / Bariyer Üstü")
         ]
         
         for idx, (energy, barrier, name) in enumerate(scenarios):
@@ -6034,7 +6043,7 @@ class QuantumKececiCurve:
             transmission = 1.0 if energy >= barrier else np.exp(-2 * np.sqrt(barrier - energy))
             
             generator = KececiCurveGenerator(
-                num_children=6,
+                num_children=5,
                 max_level=4,
                 scale_factor=0.4,
                 base_radius=3.0,
@@ -6052,19 +6061,33 @@ class QuantumKececiCurve:
             generator.generate_curve()
             self._draw_curve(ax, generator, f"T = {transmission:.3f}")
             
-            # Bariyer
+            # Bariyeri çiz
             barrier_x = [-1, -1, 1, 1]
             barrier_y = [0, barrier, barrier, 0]
             ax.fill(barrier_x, barrier_y, color='red', alpha=0.2)
             ax.plot(barrier_x, barrier_y, 'r-', linewidth=2, alpha=0.5)
             
+            # --- Otomatik sınırlar (tüm eğri görünsün) ---
+            # Eğri noktalarını topla
+            xs = [p[0][0] for p in generator.all_points]
+            ys = [p[0][1] for p in generator.all_points]
+            # Bariyer köşelerini de dahil et
+            xs.extend(barrier_x)
+            ys.extend(barrier_y)
+            
+            x_min, x_max = min(xs), max(xs)
+            y_min, y_max = min(ys), max(ys)
+            margin_x = 0.5
+            margin_y = 0.5
+            ax.set_xlim(x_min - margin_x, x_max + margin_x)
+            ax.set_ylim(y_min - margin_y, y_max + margin_y)
+            
+            # İki dilli başlık
             ax.set_title(f"{name}\nE={energy:.1f}, V₀={barrier:.1f}", color='white')
-            ax.set_xlim(-3.5, 3.5)
-            ax.set_ylim(-3, 3.5)
             ax.set_aspect('equal')
             ax.axis('off')
         
-        plt.suptitle("Kuantum Tünelleme", color='white', fontsize=16, y=0.98)
+        plt.suptitle("Quantum Tunneling / Kuantum Tünelleme", color='white', fontsize=16, y=0.98)
         plt.tight_layout()
         plt.show()
         self.figures.append(fig)
@@ -6113,17 +6136,17 @@ class QuantumKececiCurve:
             ax.set_aspect('equal')
             ax.axis('off')
         
-        plt.suptitle("Kuantum Girişim Desenleri", color='white', fontsize=16, y=0.98)
+        plt.suptitle("Quantum Interference Patterns/Kuantum Girişim Desenleri", color='white', fontsize=16, y=0.98)
         plt.tight_layout()
         plt.show()
         self.figures.append(fig)
     
     def generate_wave_function_collapse(self):
-        """Dalga fonksiyonu çöküşü"""
+        """Wave Function Collapse/Dalga fonksiyonu çöküşü"""
         fig, axes = plt.subplots(1, 3, figsize=(18, 6))
         fig.patch.set_facecolor('#0a0a1a')
         
-        stages = ["Süperpozisyon", "Ölçüm", "Çöküş"]
+        stages = ["Superposition/Süperpozisyon", "Measurement/Ölçüm", "Collapse/Çöküş"]
         
         for idx, stage in enumerate(stages):
             ax = axes[idx]
@@ -6132,7 +6155,7 @@ class QuantumKececiCurve:
             if stage == "Süperpozisyon":
                 for state in range(3):
                     generator = KececiCurveGenerator(
-                        num_children=6,
+                        num_children=5,
                         max_level=4,
                         scale_factor=0.4,
                         base_radius=3.0,
@@ -6190,178 +6213,114 @@ class QuantumKececiCurve:
             ax.set_aspect('equal')
             ax.axis('off')
         
-        plt.suptitle("Dalga Fonksiyonu Çöküşü", color='white', fontsize=16, y=0.98)
+        plt.suptitle("Wave Function Collapse/Dalga Fonksiyonu Çöküşü", color='white', fontsize=16, y=0.98)
         plt.tight_layout()
         plt.show()
         self.figures.append(fig)
 
 def generate_kececi_curve_gallery():
     """
-    Farklı parametre kombinasyonları ile özgün Keçeci Eğrileri galerisi oluştur
+    Farklı parametre kombinasyonları ile özgün Keçeci Eğrileri galerisi oluşturur.
+    Her eğri, alt grafik alanını tamamen dolduracak şekilde otomatik ölçeklenir.
     """
-    
-    # Farklı konfigürasyonlar - her biri tamamen özgün bir eğri
     configurations = [
-        {
-            "name": "Klasik Keçeci",
-            "params": {
-                "num_children": 6,
-                "max_level": 4,
-                "child_ordering": ChildOrdering.SEQUENTIAL,
-                "growth_direction": GrowthDirection.INWARD,
-                "connection_mode": ConnectionMode.CONTINUOUS,
-            }
-        },
-        {
-            "name": "Alternatif Spiral",
-            "params": {
-                "num_children": 8,
-                "max_level": 3,
-                "child_ordering": ChildOrdering.ALTERNATING,
-                "growth_direction": GrowthDirection.OUTWARD,
-                "connection_mode": ConnectionMode.SPIRAL,
-                "angle_variation": 0.3,
-            }
-        },
-        {
-            "name": "Kuantum Dolanıklık",
-            "params": {
-                "num_children": 5,
-                "max_level": 4,
-                "child_ordering": ChildOrdering.RANDOM,
-                "growth_direction": GrowthDirection.TANGENT,
-                "connection_mode": ConnectionMode.STAR_BURST,
-                "perturbation": 0.1,
-                "color_by_level": True,
-                "random_seed": 42,
-            }
-        },
-        {
-            "name": "Galaktik Sarmal",
-            "params": {
-                "num_children": 12,
-                "max_level": 3,
-                "child_ordering": ChildOrdering.SPIRAL_OUTWARD,
-                "growth_direction": GrowthDirection.OUTWARD,
-                "connection_mode": ConnectionMode.SPIRAL,
-                "angle_offset": np.pi / 6,
-                "angle_variation": 0.2,
-                "radial_variation": 0.15,
-                "color_by_angle": True,
-            }
-        },
-        {
-            "name": "Kaotik Fraktal",
-            "params": {
-                "num_children": 7,
-                "max_level": 4,
-                "child_ordering": ChildOrdering.QUADRANT,
-                "growth_direction": GrowthDirection.OVERLAPPING,
-                "connection_mode": ConnectionMode.ZIGZAG,
-                "perturbation": 0.15,
-                "level_dependent_children": True,
-                "color_by_level": True,
-            }
-        },
-        {
-            "name": "Kristal Kafes",
-            "params": {
-                "num_children": 4,
-                "max_level": 5,
-                "child_ordering": ChildOrdering.REVERSE_ALTERNATING,
-                "growth_direction": GrowthDirection.TANGENT,
-                "connection_mode": ConnectionMode.LEVEL_WISE,
-                "scale_factor": 0.4,
-                "color_by_level": True,
-                "line_style": "--",
-            }
-        },
-        {
-            "name": "Nöral Ağ",
-            "params": {
-                "num_children": 9,
-                "max_level": 3,
-                "child_ordering": ChildOrdering.ANGLE_BASED,
-                "growth_direction": GrowthDirection.OUTWARD,
-                "connection_mode": ConnectionMode.STAR_BURST,
-                "angle_variation": 0.5,
-                "radial_variation": 0.2,
-                "color_by_angle": True,
-                "line_width": 0.5,
-            }
-        },
-        {
-            "name": "Çiçek Deseni",
-            "params": {
-                "num_children": 6,
-                "max_level": 4,
-                "child_ordering": ChildOrdering.SPIRAL_INWARD,
-                "growth_direction": GrowthDirection.OVERLAPPING,
-                "connection_mode": ConnectionMode.CONTINUOUS,
-                "angle_offset": np.pi / 4,
-                "scale_factor": 0.6,
-                "color_by_level": True,
-                "color_saturation": 0.8,
-            }
-        },
+        {"name": "Klasik Keçeci / Classic Keçeci",
+         "params": {"num_children": 6, "max_level": 4, "child_ordering": ChildOrdering.SEQUENTIAL,
+                    "growth_direction": GrowthDirection.INWARD, "connection_mode": ConnectionMode.CONTINUOUS}},
+        {"name": "Alternatif Spiral / Alternating Spiral",
+         "params": {"num_children": 8, "max_level": 3, "child_ordering": ChildOrdering.ALTERNATING,
+                    "growth_direction": GrowthDirection.OUTWARD, "connection_mode": ConnectionMode.SPIRAL,
+                    "angle_variation": 0.3}},
+        {"name": "Kuantum Dolanıklık / Quantum Entanglement",
+         "params": {"num_children": 5, "max_level": 4, "child_ordering": ChildOrdering.RANDOM,
+                    "growth_direction": GrowthDirection.TANGENT, "connection_mode": ConnectionMode.STAR_BURST,
+                    "perturbation": 0.1, "color_by_level": True, "random_seed": 42}},
+        {"name": "Galaktik Sarmal / Galactic Spiral",
+         "params": {"num_children": 12, "max_level": 3, "child_ordering": ChildOrdering.SPIRAL_OUTWARD,
+                    "growth_direction": GrowthDirection.OUTWARD, "connection_mode": ConnectionMode.SPIRAL,
+                    "angle_offset": np.pi / 6, "angle_variation": 0.2, "radial_variation": 0.15,
+                    "color_by_angle": True}},
+        {"name": "Kaotik Fraktal / Chaotic Fractal",
+         "params": {"num_children": 7, "max_level": 4, "child_ordering": ChildOrdering.QUADRANT,
+                    "growth_direction": GrowthDirection.OVERLAPPING, "connection_mode": ConnectionMode.ZIGZAG,
+                    "perturbation": 0.15, "level_dependent_children": True, "color_by_level": True}},
+        {"name": "Kristal Kafes / Crystal Lattice",
+         "params": {"num_children": 4, "max_level": 5, "child_ordering": ChildOrdering.REVERSE_ALTERNATING,
+                    "growth_direction": GrowthDirection.TANGENT, "connection_mode": ConnectionMode.LEVEL_WISE,
+                    "scale_factor": 0.4, "color_by_level": True, "line_style": "--"}},
+        {"name": "Nöral Ağ / Neural Network",
+         "params": {"num_children": 9, "max_level": 3, "child_ordering": ChildOrdering.ANGLE_BASED,
+                    "growth_direction": GrowthDirection.OUTWARD, "connection_mode": ConnectionMode.STAR_BURST,
+                    "angle_variation": 0.5, "radial_variation": 0.2, "color_by_angle": True, "line_width": 0.5}},
+        {"name": "Çiçek Deseni / Flower Pattern",
+         "params": {"num_children": 6, "max_level": 4, "child_ordering": ChildOrdering.SPIRAL_INWARD,
+                    "growth_direction": GrowthDirection.OVERLAPPING, "connection_mode": ConnectionMode.CONTINUOUS,
+                    "angle_offset": np.pi / 4, "scale_factor": 0.6, "color_by_level": True, "color_saturation": 0.8}}
     ]
-    
-    # Galeriyi oluştur
-    fig, axes = plt.subplots(2, 4, figsize=(20, 10))
+
+    fig, axes = plt.subplots(2, 4, figsize=(22, 12))
+    fig.patch.set_facecolor('#0a0a1a')
     axes = axes.flatten()
-    
+
     for idx, config in enumerate(configurations):
-        if idx < len(axes):
-            generator = KececiCurveGenerator(**config["params"])
-            generator.generate_curve()
-            
-            ax = axes[idx]
-            ax.set_facecolor('black')
-            
-            # Eğriyi çiz (görselleştirme fonksiyonunu manuel olarak uygula)
-            sorted_points = sorted(generator.all_points, key=lambda p: (p[1], p[2]))
-            if len(sorted_points) > 1:
-                x_coords = [p[0][0] for p in sorted_points]
-                y_coords = [p[0][1] for p in sorted_points]
-                
-                if generator.color_by_level or generator.color_by_angle:
-                    for i in range(len(x_coords) - 1):
-                        color = generator._get_color_for_segment(
-                            sorted_points[i][1], 
-                            sorted_points[i][2]
-                        )
-                        ax.plot(
-                            x_coords[i:i+2], y_coords[i:i+2],
-                            generator.line_style, 
-                            linewidth=generator.line_width,
-                            color=color, alpha=0.8
-                        )
-                else:
-                    ax.plot(
-                        x_coords, y_coords,
-                        generator.line_style, 
-                        linewidth=generator.line_width,
-                        color=generator.line_color, alpha=0.8
-                    )
-            
+        if idx >= len(axes):
+            break
+
+        ax = axes[idx]
+        ax.set_facecolor('black')
+
+        generator = KececiCurveGenerator(**config["params"])
+        generator.generate_curve()
+
+        # Nokta koordinatlarını topla
+        xs = [p[0][0] for p in generator.all_points]
+        ys = [p[0][1] for p in generator.all_points]
+
+        if len(xs) > 1:
+            # Renk ve stil ile çizim
+            sorted_pts = sorted(generator.all_points, key=lambda p: (p[1], p[2]))
+            x_sorted = [p[0][0] for p in sorted_pts]
+            y_sorted = [p[0][1] for p in sorted_pts]
+
+            if generator.color_by_level or generator.color_by_angle:
+                for i in range(len(x_sorted) - 1):
+                    color = generator._get_color_for_segment(sorted_pts[i][1], sorted_pts[i][2])
+                    ax.plot(x_sorted[i:i+2], y_sorted[i:i+2],
+                            generator.line_style, linewidth=generator.line_width,
+                            color=color, alpha=0.85)
+            else:
+                ax.plot(x_sorted, y_sorted, generator.line_style,
+                        linewidth=generator.line_width, color=generator.line_color, alpha=0.85)
+
+            # İsteğe bağlı nokta çizimi
             if generator.show_points:
                 for point, level, angle in generator.all_points:
+                    c = 'red' if level == generator.max_level else ('white' if not generator.color_by_level else None)
                     if generator.color_by_level:
-                        color = generator._get_color_for_segment(level, angle)
-                    else:
-                        color = 'red' if level == generator.max_level else 'white'
-                    ax.plot(point[0], point[1], 'o', markersize=1, color=color, alpha=0.6)
-            
-            ax.set_aspect('equal', adjustable='box')
-            ax.axis('off')
-            ax.set_title(config["name"], color='white', fontsize=10)
-            
-            max_extent = generator.base_radius * (1 + 2 * generator.scale_factor * generator.max_level) * 1.1
-            ax.set_xlim(-max_extent, max_extent)
-            ax.set_ylim(-max_extent, max_extent)
-    
-    plt.suptitle("Keçeci Curve Ailesi - Parametrik Özgün Eğriler", 
-                 color='white', fontsize=16, y=0.98)
+                        c = generator._get_color_for_segment(level, angle)
+                    ax.plot(point[0], point[1], 'o', markersize=1.5, color=c, alpha=0.7)
+
+            # Ekseni veriye göre ayarla (otomatik doldur)
+            x_min, x_max = min(xs), max(xs)
+            y_min, y_max = min(ys), max(ys)
+            margin_x = max(0.2, (x_max - x_min) * 0.1)
+            margin_y = max(0.2, (y_max - y_min) * 0.1)
+            ax.set_xlim(x_min - margin_x, x_max + margin_x)
+            ax.set_ylim(y_min - margin_y, y_max + margin_y)
+        else:
+            ax.set_xlim(-1, 1)
+            ax.set_ylim(-1, 1)
+
+        ax.set_aspect('equal')
+        ax.axis('off')
+        ax.set_title(config["name"], color='white', fontsize=9, pad=4)
+
+    # Kullanılmayan alt grafikleri gizle
+    for idx in range(len(configurations), len(axes)):
+        axes[idx].set_visible(False)
+
+    plt.suptitle("Keçeci Curve Gallery / Keçeci Eğri Galerisi",
+                 color='white', fontsize=18, fontweight='bold', y=1.01)
     plt.tight_layout()
     plt.show()
 
@@ -6405,9 +6364,9 @@ def peano_test(order: int = 3):
     for i in range(len(pts)-1):
         ax.plot(pts[i:i+2, 0], pts[i:i+2, 1], color=colors[i], linewidth=1.2)
     ax.scatter(*pts[0],  color='white', s=150, marker='o',
-               edgecolor='#ff9944', linewidth=2, zorder=5, label='Başlangıç')
+               edgecolor='#ff9944', linewidth=2, zorder=5, label='Start/Başlangıç')
     ax.scatter(*pts[-1], color='yellow', s=150, marker='s',
-               edgecolor='#ff9944', linewidth=2, zorder=5, label='Bitiş')
+               edgecolor='#ff9944', linewidth=2, zorder=5, label='End/Bitiş')
     ax.set_title(f"Peano Eğrisi (order={order}) – Test", color='white', fontsize=14)
     ax.set_aspect('equal')
     ax.axis('off')
@@ -6419,7 +6378,7 @@ def peano_test(order: int = 3):
     theoretical_points = 9 ** order
     actual_points = len(pts)
     print(f"\n{'='*60}")
-    print(f"PEANO EĞRİSİ TESTLERİ (order={order})")
+    print(f"Peano (Curve Test) Eğrisi Testleri (order={order})")
     print(f"{'='*60}")
     print(f"Nokta sayısı – beklenen: {theoretical_points}, gerçekleşen: {actual_points}")
     if actual_points == theoretical_points:
@@ -6515,8 +6474,8 @@ def show_menu():
                lambda: Rich3DQuantumVisualizer().visualize_wigner_function_3d()),
         '22': ('Entanglement Network 3D / Dolanıklık Ağı 3B',
                lambda: Rich3DQuantumVisualizer().visualize_entanglement_network_3d()),
-        '23': ('Adiabatic Evolution 3D / Adiabatik Kuantum Evrimi 3B',
-               lambda: Rich3DQuantumVisualizer().visualize_adiabatic_evolution_3d()),
+        '23': ('Adiabatic Process 3D / Adiabatik Kuantum Süreci 3B',
+               lambda: Rich3DQuantumVisualizer().visualize_adiabatic_process_3d()),
         '24': ('Topological Anyons 3D / Topolojik Anyonlar 3B',
                lambda: Rich3DQuantumVisualizer().visualize_topological_anyons_3d()),
         '25': ('QFT Spectrum 3D / Kuantum Fourier Dönüşümü 3B',
@@ -6558,7 +6517,7 @@ def show_menu():
                lambda: plot_sierpinski_comparison(3)),
         '43': ('Sierpinski Curve / Sierpinski Eğrisi',
                lambda: plot_sierpinski_curve(3)),
-        '44': ('Sierpinski Process / Sierpinski Gelişimi',
+        '44': ('Sierpinski Process / Sierpinski Süreci',
                plot_sierpinski_process),
         '45': ('Sierpinski Triangle / Sierpinski Üçgeni',
                lambda: plot_sierpinski_triangle(4)),
@@ -6570,10 +6529,10 @@ def show_menu():
                lambda: peano_test(3)),
 
         # ===================== EK KARŞILAŞTIRMA VE ANALİZLER / ADDITIONAL COMPARISONS & ANALYSES =====================
-        '49': ('Curve Evolution by Level / Eğrilerin Seviyeye Göre Gelişimi',
+        '49': ('Curve Process by Level / Eğrilerin Seviyeye Göre Gelişimi',
                lambda: CurveComparisonVisualizer().generate_process_comparison()),
-        '50': ('Connectivity & Locality / Bağlantılılık ve Lokalite',
-               lambda: CurveComparisonVisualizer().generate_connectivity_comparison()),
+        '50': ('Locality / Lokalite',
+               lambda: CurveComparisonVisualizer().generate_locality_comparison()),
         '51': ('Keçeci Parametric Variations / Keçeci Parametrik Varyasyonları',
                lambda: CurveComparisonVisualizer().generate_kececi_variations()),
         '52': ('Detailed Radar Comparison / Detaylı Radar Karşılaştırması',
