@@ -6500,14 +6500,7 @@ def show_menu():
                lambda: CurveComparisonVisualizer().generate_start_end_comparison()),
         '15': ('Comprehensive Comparison (Table) / Kapsamlı Karşılaştırma (Tablo)',
                lambda: CurveComparisonVisualizer().generate_comprehensive_comparison()),
-        #'16': ('Locality Heatmap – Both Normalizations / Lokalite Isı Haritası – İki Normalizasyon', lambda: locality_random_sampling(4, 2000)),
-        #'16': ('Locality Correlation / Lokalite Korelasyonu', lambda: locality_correlation(4, 5000)),        
-        #'16': ('Locality Preservation Score / Lokalite Koruma Skoru', lambda: locality_preservation_score(4)),
-        #'16': ('Locality Spearman / Lokalite Spearman', lambda: locality_spearman(4, 10000)),
-        #'16': ('Locality Spearman (Normalized) / Lokalite Spearman (Normalleştirilmiş)', lambda: locality_spearman_normalized(4, 1000)), 
-        #'16': ('Locality Power Law / Lokalite Kuvvet Yasası', lambda: locality_powerlaw(4, 10000)), 
-        #'16': ('Locality Normalized Alpha / Lokalite Normalleştirilmiş Üs', lambda: locality_normalized_alpha(4, 50)),
-        '16': ('Locality Combined Score / Lokalite Birleşik Skoru', lambda: locality_combined(4, 50)), # en iyi sonuç
+        '16': ('Locality Combined Score / Lokalite Birleşik Skoru', lambda: locality_combined(4, 50)),
         '17': ('Indexing Performance Comparison / Veri İndeksleme Karşılaştırması',
                indexing_performance_comparison),
 
@@ -6575,19 +6568,21 @@ def show_menu():
                lambda: plot_peano_curve(3)),
         '48': ('Peano Verification Test / Peano Doğrulama Testi',
                lambda: peano_test(3)),
-        # ===================== Other/Diğerleri =====================
-        '49': ('Uzay Doldurma eğrilerinin Seviyeye Göre Değişimi',
+
+        # ===================== EK KARŞILAŞTIRMA VE ANALİZLER / ADDITIONAL COMPARISONS & ANALYSES =====================
+        '49': ('Curve Evolution by Level / Eğrilerin Seviyeye Göre Gelişimi',
                lambda: CurveComparisonVisualizer().generate_process_comparison()),
-        '50': ('Uzay Doldurma Eğrilerinde Lokalite (Yerellik) Karşılaştırması',
+        '50': ('Connectivity & Locality / Bağlantılılık ve Lokalite',
                lambda: CurveComparisonVisualizer().generate_connectivity_comparison()),
-        '51': ('Keçeci Eğrisinin Parametrik Varyasyonları',
+        '51': ('Keçeci Parametric Variations / Keçeci Parametrik Varyasyonları',
                lambda: CurveComparisonVisualizer().generate_kececi_variations()),
-        '52': ('generate_radar_comparison',
+        '52': ('Detailed Radar Comparison / Detaylı Radar Karşılaştırması',
                lambda: CurveComparisonVisualizer().generate_radar_comparison()),
-        '53': ('Locality Heatmap – Both Normalizations / Lokalite Isı Haritası – İki Normalizasyon', locality_heatmap_both_versions),
+        '53': ('Locality Heatmap – Both Normalizations / Lokalite Isı Haritası – İki Normalizasyon',
+               locality_heatmap_both_versions),
     }
 
-    # Grup başlıkları (ekrana yazdırmak için)
+    # Grup başlıkları
     groups = [
         ("DESEN GALERİLERİ / PATTERN GALLERIES", range(1, 11)),
         ("EĞRİ KARŞILAŞTIRMALARI / CURVE COMPARISONS", range(11, 18)),
@@ -6595,7 +6590,7 @@ def show_menu():
         ("KUANTUM ALGORİTMALARI / QUANTUM ALGORITHMS", range(26, 37)),
         ("KEÇECİ PARAMETRE ETKİLERİ / KEÇECİ PARAMETER EFFECTS", range(37, 42)),
         ("SİERPİNSKİ & PEANO ÖZEL / SIERPINSKI & PEANO SPECIALS", range(42, 49)),
-        ("Other/Diğerleri", range(49, 54)),
+        ("EK KARŞILAŞTIRMA VE ANALİZLER / ADDITIONAL COMPARISONS & ANALYSES", range(49, 54)),
     ]
 
     while True:
