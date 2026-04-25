@@ -213,7 +213,7 @@ Bu interaktif menü, **çiçek desenlerinden kuantum algoritmalarına** kadar 30
   20. Stratum Architecture / Stratum Mimarisi
   21. 3D Wigner Function / 3B Wigner Fonksiyonu
   22. Entanglement Network 3D / Dolanıklık Ağı 3B
-  23. Adiabatic Evolution 3D / Adiabatik Kuantum Evrimi 3B
+  23. Adiabatic Process 3D / Adiabatik Kuantum Süreci 3B
   24. Topological Anyons 3D / Topolojik Anyonlar 3B
   25. QFT Spectrum 3D / Kuantum Fourier Dönüşümü 3B
 
@@ -243,7 +243,7 @@ Bu interaktif menü, **çiçek desenlerinden kuantum algoritmalarına** kadar 30
   --------------------------------------------------------------------
   42. Sierpinski Comparison / Sierpinski Karşılaştırması
   43. Sierpinski Curve / Sierpinski Eğrisi
-  44. Sierpinski Process / Sierpinski Gelişimi
+  44. Sierpinski Process / Sierpinski Süreci
   45. Sierpinski Triangle / Sierpinski Üçgeni
   46. Sierpinski Test / Sierpinski Doğrulama Testi
   47. Peano Curve / Peano Eğrisi
@@ -251,8 +251,8 @@ Bu interaktif menü, **çiçek desenlerinden kuantum algoritmalarına** kadar 30
 
   EK KARŞILAŞTIRMA VE ANALİZLER / ADDITIONAL COMPARISONS & ANALYSES
   --------------------------------------------------------------------
-  49. Curve Evolution by Level / Eğrilerin Seviyeye Göre Gelişimi
-  50. Connectivity & Locality / Bağlantılılık ve Lokalite
+  49. Curve Process by Level / Eğrilerin Seviyeye Göre Gelişimi
+  50. Locality / Lokalite
   51. Keçeci Parametric Variations / Keçeci Parametrik Varyasyonları
   52. Detailed Radar Comparison / Detaylı Radar Karşılaştırması
   53. Locality Heatmap – Both Normalizations / Lokalite Isı Haritası – İki Normalizasyon
