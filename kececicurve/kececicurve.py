@@ -43,6 +43,8 @@ import matplotlib.patches as mpatches
 import colorsys
 from enum import Enum
 from scipy.spatial import KDTree
+from scipy.spatial.distance import pdist
+from scipy.stats import spearmanr, linregress
 from typing import List, Tuple, Callable, Optional, Union
 import warnings
 warnings.filterwarnings('ignore')
@@ -322,7 +324,7 @@ class CurveComparisonVisualizer:
     def __init__(self):
         pass
     
-    def create_start_end_comparison(self):
+    def generate_start_end_comparison(self):
         fig, axes = plt.subplots(2, 4, figsize=(24, 12))
         fig.patch.set_facecolor('#0a0a1a')
         axes_flat = axes.flatten()          # ← tanımlandı
@@ -399,7 +401,7 @@ class CurveComparisonVisualizer:
         plt.show()
         return fig
     
-    def create_comprehensive_comparison(self):
+    def generate_comprehensive_comparison(self):
         fig = plt.figure(figsize=(24, 14))
         fig.patch.set_facecolor('#0a0a1a')
         
@@ -568,6 +570,298 @@ class CurveComparisonVisualizer:
                color='white', fontsize=10, ha='center',
                bbox=dict(boxstyle='round', facecolor='#1a1a3a', edgecolor='#333366'))
 
+    def generate_process_comparison(self):
+        """Evrim karşılaştırması: Farklı seviyelerde eğrilerin gelişimi"""
+        fig, axes = plt.subplots(3, 6, figsize=(24, 16))
+        fig.patch.set_facecolor('#0a0a1a')
+        
+        levels = [1, 2, 3]
+        curves = ['Keçeci', 'Hilbert', 'Morton', 'Moore', 'Sierpinski', 'Peano']
+        
+        for row, level in enumerate(levels):
+            for col, curve_name in enumerate(curves):
+                ax = axes[row, col]
+                ax.set_facecolor('#0a0a1a')
+                
+                points = self._get_curve_points(curve_name, level)
+                color = COMPARISON_DATA[curve_name]['color']
+                
+                if len(points) > 1:
+                    xs = [p[0] for p in points]
+                    ys = [p[1] for p in points]
+                    ax.plot(xs, ys, '-', color=color, linewidth=2 - level*0.2, alpha=0.9)
+                    ax.scatter(xs[0], ys[0], color='white', s=50, marker='o', zorder=5)
+                    ax.scatter(xs[-1], ys[-1], color='yellow', s=50, marker='s', zorder=5)
+                
+                ax.set_aspect('equal')
+                ax.set_xticks([])
+                ax.set_yticks([])
+                
+                for spine in ax.spines.values():
+                    spine.set_color('#333366')
+                    spine.set_linewidth(0.5)
+                
+                if row == 0:
+                    ax.set_title(curve_name, color='white', fontsize=12, fontweight='bold')
+                
+                if col == 0:
+                    ax.set_ylabel(f"Seviye {level}", color='white', fontsize=11, 
+                                 fontweight='bold', rotation=0, labelpad=30)
+        
+        plt.suptitle("Uzay Doldurma Eğrilerinin Seviyelere Göre Değişimi", 
+                    color='white', fontsize=18, fontweight='bold', y=0.99)
+        
+        plt.tight_layout()
+        plt.show()
+        
+        return fig
+    
+    def generate_connectivity_comparison(self):
+        """Bağlantılılık karşılaştırması: Eğrilerin lokalite özellikleri"""
+        fig, axes = plt.subplots(2, 4, figsize=(24, 12))   # 2x4 grid
+        fig.patch.set_facecolor('#0a0a1a')
+        axes_flat = axes.flatten()
+
+        curves = ['Keçeci', 'Hilbert', 'Morton', 'Moore', 'Sierpinski', 'Peano']
+
+        for idx, curve_name in enumerate(curves):
+            ax = axes_flat[idx]          # ilk 6 eksen (0..5)
+            ax.set_facecolor('#0a0a1a')
+
+            points = self._get_curve_points(curve_name, 3)
+            color = COMPARISON_DATA[curve_name]['color']
+
+            if len(points) > 1:
+                xs = [p[0] for p in points]
+                ys = [p[1] for p in points]
+
+                # Peano eğrisini diğer eğrilerle aynı ölçeğe getir
+                if curve_name == 'Peano':
+                    xs = [x * 3 - 1.5 for x in xs]
+                    ys = [y * 3 - 1.5 for y in ys]
+
+                ax.plot(xs, ys, '-', color=color, linewidth=2, alpha=0.8)
+
+                # Lokalite bağlantı çizgileri
+                n = len(points)
+                sample_indices = np.linspace(0, n - 1, 12, dtype=int)
+                for i, idx1 in enumerate(sample_indices):
+                    for j, idx2 in enumerate(sample_indices):
+                        if i < j:
+                            dist_idx = abs(idx1 - idx2)
+                            dist_spatial = np.sqrt(
+                                (xs[idx1] - xs[idx2]) ** 2 + (ys[idx1] - ys[idx2]) ** 2
+                            )
+                            if dist_idx < n / 4 and dist_spatial < 1.5:
+                                alpha = 0.3 * (1 - dist_idx / n)
+                                ax.plot(
+                                    [xs[idx1], xs[idx2]], [ys[idx1], ys[idx2]],
+                                    '--', color='yellow', linewidth=1, alpha=alpha,
+                                )
+
+            # Ortak eksen sınırları
+            ax.set_xlim(-2.5, 2.5)
+            ax.set_ylim(-2.5, 2.5)
+            ax.set_title(
+                f"{curve_name}\n{COMPARISON_DATA[curve_name]['locality']} Lokalite",
+                color='white', fontsize=10,
+            )
+            ax.set_aspect('equal')
+            ax.set_xticks([])
+            ax.set_yticks([])
+
+        # Bilgi panelini 7. eksene (index 6) taşı
+        ax_info = axes_flat[6]
+        ax_info.set_facecolor('#0a0a1a')
+        self._draw_locality_info(ax_info)
+
+        # Son ekseni (index 7) gizle
+        axes_flat[7].set_visible(False)
+
+        plt.suptitle(
+            "Uzay Doldurma Eğrilerinde Lokalite (Yerellik) Karşılaştırması\n"
+            "Sarı çizgiler: İndeks olarak yakın noktaların uzamsal yakınlığı",
+            color='white', fontsize=16, fontweight='bold', y=0.99,
+        )
+        plt.tight_layout()
+        plt.show()
+        return fig
+    
+    def generate_kececi_variations(self):
+        """Keçeci Eğrisi'nin parametrik varyasyonları"""
+        fig, axes = plt.subplots(2, 4, figsize=(20, 12))
+        fig.patch.set_facecolor('#0a0a1a')
+        
+        variations = [
+            (4, 3, 'outward', 'sequential', '4-Çocuk\nDışa Büyüme'),
+            (6, 3, 'outward', 'sequential', '6-Çocuk\nDışa Büyüme'),
+            (8, 3, 'outward', 'sequential', '8-Çocuk\nDışa Büyüme'),
+            (6, 3, 'inward', 'sequential', '6-Çocuk\nİçe Büyüme'),
+            (6, 3, 'outward', 'alternating', '6-Çocuk\nAlternatif Sıralama'),
+            (6, 3, 'outward', 'spiral', '6-Çocuk\nSpiral Sıralama'),
+            (8, 2, 'outward', 'spiral', '8-Çocuk Seviye 2\nSpiral'),
+            (10, 2, 'outward', 'alternating', '10-Çocuk Seviye 2\nAlternatif'),
+        ]
+        
+        for idx, (nc, ml, gm, om, title) in enumerate(variations):
+            ax = axes[idx // 4, idx % 4]
+            ax.set_facecolor('#0a0a1a')
+            
+            curve = KececiCurve(
+                num_children=nc,
+                max_level=ml,
+                growth_mode=gm,
+                ordering_mode=om,
+                base_radius=1.5,
+                scale_factor=0.4
+            )
+            points = curve.generate()
+            
+            if len(points) > 1:
+                xs = [p[0] for p in points]
+                ys = [p[1] for p in points]
+                
+                for i in range(len(xs) - 1):
+                    hue = i / len(xs)
+                    color = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
+                    ax.plot(xs[i:i+2], ys[i:i+2], '-', color=color, linewidth=2, alpha=0.9)
+                
+                ax.scatter(xs[0], ys[0], color='white', s=80, marker='o', zorder=5)
+                ax.scatter(xs[-1], ys[-1], color='yellow', s=80, marker='s', zorder=5)
+            
+            ax.set_title(f"Keçeci: {title}", color='white', fontsize=10)
+            ax.set_aspect('equal')
+            ax.set_xticks([])
+            ax.set_yticks([])
+            
+            for spine in ax.spines.values():
+                spine.set_color('#333366')
+                spine.set_linewidth(0.5)
+        
+        plt.suptitle("Keçeci Eğrisi'nin Parametrik Varyasyonları\n"
+                    "Çocuk sayısı, büyüme yönü, sıralama stratejisi ve seviye değişimleri", 
+                    color='white', fontsize=16, fontweight='bold', y=0.99)
+        
+        plt.tight_layout()
+        plt.show()
+        
+        return fig
+    
+    def generate_radar_comparison(self):
+        """Radar grafiği ile özellik karşılaştırması (güncel)"""
+        fig = plt.figure(figsize=(18, 8))
+        fig.patch.set_facecolor('#0a0a1a')
+        
+        # 6 kategori (tüm eğriler için anlamlı)
+        categories = ['Lokalite', 'Süreklilik', 'Esneklik',
+                      'Görsel\nEstetik', 'Hesaplama\nHızı', 'Uzay\nDoldurma']
+        
+        # Güncel skorlar (0‑5)
+        scores = {
+            'Keçeci':     [4, 4.0, 3.5, 5.0, 5.0, 4.0],
+            'Hilbert':    [5, 5.0, 4.0, 3.5, 1.0, 5.0],
+            'Morton':     [3, 2.0, 5.0, 2.5, 1.0, 4.5],
+            'Moore':      [5, 5.0, 4.0, 3.5, 1.0, 5.0],
+            'Sierpinski': [4, 5.0, 3.5, 4.5, 1.0, 3.5],
+            'Peano':      [2, 5.0, 3.0, 3.0, 1.0, 4.5],
+        }
+        
+        colors = {
+            'Keçeci': '#ff4444',
+            'Hilbert': '#4488ff',
+            'Morton': '#44ff44',
+            'Moore': '#ffff44',
+            'Sierpinski': '#ff44ff',
+            'Peano': '#ff9944',
+        }
+        
+        # --- Radar grafiği ---
+        ax1 = fig.add_subplot(1, 2, 1, projection='polar')
+        ax1.set_facecolor('#0a0a1a')
+        
+        N = len(categories)
+        angles = np.linspace(0, 2 * np.pi, N, endpoint=False).tolist()
+        angles += angles[:1]
+        
+        for curve_name, score in scores.items():
+            values = score + score[:1]
+            ax1.plot(angles, values, 'o-', linewidth=2, label=curve_name,
+                     color=colors[curve_name], markersize=6)
+            ax1.fill(angles, values, alpha=0.1, color=colors[curve_name])
+        
+        ax1.set_xticks(angles[:-1])
+        ax1.set_xticklabels(categories, color='white', fontsize=9)
+        ax1.set_ylim(0, 5.5)
+        ax1.set_yticks([1, 2, 3, 4, 5])
+        ax1.set_yticklabels(['1', '2', '3', '4', '5'], color='white', fontsize=8)
+        ax1.grid(True, alpha=0.3, color='white')
+        ax1.set_title("Özellik Karşılaştırması (Radar)", color='white', fontsize=14, fontweight='bold', pad=20)
+        ax1.legend(loc='upper right', bbox_to_anchor=(1.35, 1.0),
+                   facecolor='#1a1a3a', edgecolor='white', labelcolor='white')
+        
+        # --- Çubuk grafiği (Lokalite + Uzay Doldurma) ---
+        ax2 = fig.add_subplot(1, 2, 2)
+        ax2.set_facecolor('#0a0a1a')
+        
+        curve_names = list(scores.keys())
+        x = np.arange(len(curve_names))
+        width = 0.2
+        
+        metric1 = [scores[c][0] for c in curve_names]  # Lokalite
+        metric2 = [scores[c][5] for c in curve_names]  # Uzay Doldurma
+        
+        bars1 = ax2.bar(x - width/2, metric1, width, label='Lokalite',
+                        color='#66aaff', alpha=0.8)
+        bars2 = ax2.bar(x + width/2, metric2, width, label='Uzay Doldurma',
+                        color='#ff6666', alpha=0.8)
+        
+        ax2.set_xticks(x)
+        ax2.set_xticklabels(curve_names, color='white', fontsize=11)
+        ax2.set_ylim(0, 5.5)
+        ax2.set_ylabel('Puan (0-5)', color='white', fontsize=11)
+        ax2.tick_params(axis='y', colors='white')
+        ax2.legend(loc='upper right', facecolor='#1a1a3a', edgecolor='white', labelcolor='white')
+        ax2.set_title("Lokalite ve Uzay Doldurma", color='white', fontsize=14, fontweight='bold', pad=20)
+        ax2.grid(True, alpha=0.2, axis='y', color='white')
+        for spine in ax2.spines.values():
+            spine.set_color('#333366')
+        
+        plt.suptitle("Keçeci Eğrisi vs Klasik Eğriler – Nicel Karşılaştırma",
+                     color='white', fontsize=16, fontweight='bold', y=1.02)
+        plt.tight_layout()
+        plt.show()
+        return fig
+
+    def _draw_locality_info(self, ax):
+        """Lokalite bilgi paneli"""
+        ax.set_xlim(0, 10)
+        ax.set_ylim(0, 10)
+        ax.axis('off')
+        
+        ax.text(5, 9.5, "Lokalite (Yerellik) Nedir?", color='white', fontsize=13,
+                fontweight='bold', ha='center')
+        ax.text(5, 8.0, "İndeks olarak yakın noktaların,", color='white', fontsize=9, ha='center')
+        ax.text(5, 7.3, "uzamsal olarak da yakın olmasıdır.", color='white', fontsize=9, ha='center')
+        
+        ax.plot([2, 3], [6.0, 6.0], 'y-', linewidth=2, alpha=0.7)
+        ax.text(3.5, 6.0, "İyi Lokalite", color='yellow', fontsize=9, va='center')
+        ax.plot([2, 3], [5.2, 5.2], 'r--', linewidth=2, alpha=0.5)
+        ax.text(3.5, 5.2, "Kötü Lokalite", color='red', fontsize=9, va='center')
+        
+        ax.text(5, 4.2, "Lokalite Puanları (0-5):", color='white', fontsize=10, ha='center')
+        
+        scores_text = [
+            ("Hilbert: 5.0", '#4488ff'),
+            ("Moore: 5.0", '#ffff44'),
+            ("Keçeci: 4.0", '#ff4444'),
+            ("Sierpinski: 3.5", '#ff44ff'),
+            ("Morton: 2.0", '#44ff44'),
+            ("Peano: 2.0", '#ff9944'),
+        ]
+        for i, (text, color) in enumerate(scores_text):
+            y = 3.5 - i * 0.4
+            ax.text(5, y, text, color=color, fontsize=9, ha='center')
+
 # ============================================================================
 # OPTİMİZE KEÇECİ EĞRİSİ - ÖNBELLEK DESTEKLİ
 # ============================================================================
@@ -629,10 +923,13 @@ class KececiCurve:
                           self.angle_offset + 
                           self.angle_variation * level)
             
+            # overlapping için özel mesafe
             if self.growth_mode == 'inward':
                 distance = radius - child_radius
             elif self.growth_mode == 'tangent':
                 distance = radius
+            elif self.growth_mode == 'overlapping':
+                distance = radius * (1 - self.scale_factor * 0.5)
             else:
                 distance = radius + child_radius
             
@@ -1006,7 +1303,7 @@ COMPARISON_DATA = {
         'desc': 'Parametrik, Dairesel',
         'start_end': 'Değişken (Parametrik)',
         'continuity': 'İsteğe Bağlı',
-        'locality': 'Yüksek',
+        'locality': 'Yüksek (4)',
         'geometry': 'Dairesel',
         'children': '2-12+',
         'dimensions': '2B ve 3B'
@@ -1016,7 +1313,7 @@ COMPARISON_DATA = {
         'desc': 'Sabit 4-çocuk, Kare',
         'start_end': 'Uzak (Ayrık)',
         'continuity': 'Sürekli',
-        'locality': 'Çok Yüksek',
+        'locality': 'Çok Yüksek (5)',
         'geometry': 'Kare',
         'children': '4',
         'dimensions': '2B'
@@ -1026,7 +1323,7 @@ COMPARISON_DATA = {
         'desc': 'Sabit 4-çocuk, Z-Sıralı',
         'start_end': 'Uzak (Sıçramalı)',
         'continuity': 'Sıçramalı',
-        'locality': 'Orta',
+        'locality': 'Orta (3)',
         'geometry': 'Kare',
         'children': '4',
         'dimensions': '2B'
@@ -1036,7 +1333,7 @@ COMPARISON_DATA = {
         'desc': 'Sabit 4-çocuk, Döngüsel',
         'start_end': '1-Birim Komşu ⭐',
         'continuity': 'Sürekli',
-        'locality': 'Yüksek',
+        'locality': 'Çok Yüksek (5)',
         'geometry': 'Kare',
         'children': '4',
         'dimensions': '2B'
@@ -1046,7 +1343,7 @@ COMPARISON_DATA = {
         'desc': 'Sabit 3-çocuk, Üçgen',
         'start_end': 'Kapalı Döngü ✅',
         'continuity': 'Kapalı',
-        'locality': 'Orta',
+        'locality': 'İyi (4)',
         'geometry': 'Üçgen',
         'children': '3',
         'dimensions': '2B'
@@ -1056,7 +1353,7 @@ COMPARISON_DATA = {
         'desc': 'Sabit 9‑çocuk, Kare (merkez‑dolaşan)',
         'start_end': 'Açık (ayrık uçlar)',
         'continuity': 'Sürekli (yatay/dikey)',
-        'locality': 'Düşük‑Orta',
+        'locality': 'Düşük-Orta (2)',
         'geometry': 'Kare (3×3 tabanlı)',
         'children': '9',
         'dimensions': '2B'
@@ -1298,12 +1595,12 @@ def radar_chart_comparison():
     
     # Her eğri için 0-5 arası puanlar (gerçekçi değerler)
     scores = {
-        'Keçeci':     [4.0, 4.0, 3.0, 5.0, 5.0, 4.0],
-        'Hilbert':    [5.0, 5.0, 4.0, 3.5, 1.0, 5.0],
-        'Morton':     [3.0, 2.0, 5.0, 2.5, 1.0, 4.5],
-        'Moore':      [4.5, 5.0, 4.0, 3.5, 1.0, 5.0],
-        'Sierpinski': [3.5, 5.0, 3.5, 4.5, 1.0, 3.5],
-        'Peano':      [4.0, 5.0, 3.0, 3.0, 1.0, 4.5],
+        'Keçeci':     [4, 4.0, 3.5, 5.0, 5.0, 4.0],
+        'Hilbert':    [5, 5.0, 4.0, 3.5, 1.0, 5.0],
+        'Morton':     [3, 2.0, 5.0, 2.5, 1.0, 4.5],
+        'Moore':      [5, 5.0, 4.0, 3.5, 1.0, 5.0],
+        'Sierpinski': [4, 5.0, 3.5, 4.5, 1.0, 3.5],
+        'Peano':      [2, 5.0, 3.0, 3.0, 1.0, 4.5],
     }
     
     colors = {
@@ -1501,7 +1798,7 @@ def locality_heatmap_both_versions():
     İki farklı normalizasyon yaklaşımını karşılaştır
     """
     
-    fig, axes = plt.subplots(2, 5, figsize=(20, 8))
+    fig, axes = plt.subplots(2, 6, figsize=(20, 8))
     fig.patch.set_facecolor('#0a0a1a')
     
     curves = ['Hilbert', 'Morton', 'Moore', 'Sierpinski', 'Keçeci', 'Peano']
@@ -1603,6 +1900,497 @@ def locality_heatmap_both_versions():
     print(f"\n✅ En iyi lokalite: {min(curve_maxes, key=curve_maxes.get)}")
     print(f"⚠️ En kötü lokalite: {max(curve_maxes, key=curve_maxes.get)}")
 
+def locality_random_sampling(order=4, n_samples=2000):
+    """
+    Eğrilerin lokalitesini rastgele nokta çiftleri üzerinden karşılaştırır.
+    Daha adil bir skorlama sağlar.
+    """
+    curves = {
+        'Hilbert': ClassicalCurves.hilbert_curve,
+        'Morton': ClassicalCurves.morton_curve,
+        'Moore': ClassicalCurves.moore_curve,
+        'Sierpinski': ClassicalCurves.sierpinski_curve,
+        'Keçeci': lambda: KececiCurve(
+            num_children=5, max_level=order, base_radius=1.5, scale_factor=0.42
+        ).generate(),
+        'Peano': ClassicalCurves.peano_curve,
+    }
+
+    scores = {}
+    np.random.seed(42)
+    for name, func in curves.items():
+        pts = np.array(func(order) if name != 'Keçeci' else curves['Keçeci']())
+        n = len(pts)
+        # Rastgele indis çiftleri
+        idx1 = np.random.randint(0, n, n_samples)
+        idx2 = np.random.randint(0, n, n_samples)
+        # Aynı noktayı seçmekten kaçınalım
+        mask = idx1 != idx2
+        idx1, idx2 = idx1[mask], idx2[mask]
+        idx_dist = np.abs(idx1 - idx2)
+        spatial_dist = np.linalg.norm(pts[idx1] - pts[idx2], axis=1)
+        # Oranların medyanı (aşırı değerlerden az etkilenir)
+        ratios = spatial_dist / (idx_dist + 1)
+        scores[name] = np.median(ratios)
+
+    # Sırala ve yazdır
+    sorted_scores = sorted(scores.items(), key=lambda x: x[1])
+    print("Lokalite Skoru (medyan, düşük = iyi):")
+    for name, score in sorted_scores:
+        print(f"{name:<12}: {score:.4f}")
+
+    # Çubuk grafik
+    plt.figure(figsize=(10, 5))
+    names = [x[0] for x in sorted_scores]
+    values = [x[1] for x in sorted_scores]
+    colors = [COMPARISON_DATA[n]['color'] for n in names]
+    plt.bar(names, values, color=colors)
+    plt.ylabel('Medyan (spatial / (idx+1))', color='white')
+    plt.title('Rastgele Örneklemeli Lokalite Karşılaştırması', color='white')
+    plt.gca().set_facecolor('#0a0a1a')
+    plt.gcf().patch.set_facecolor('#0a0a1a')
+    plt.xticks(color='white')
+    plt.yticks(color='white')
+    plt.tight_layout()
+    plt.show()
+
+    return scores
+
+def locality_correlation(order=4, n_samples=5000):
+    """
+    Lokalite metriği: indeks farkı ile uzamsal mesafe arasındaki
+    Pearson korelasyonu. Yüksek korelasyon = iyi lokalite.
+    """
+    curves = {
+        'Hilbert':    ClassicalCurves.hilbert_curve(order),
+        'Morton':     ClassicalCurves.morton_curve(order),
+        'Moore':      ClassicalCurves.moore_curve(order),
+        'Sierpinski': ClassicalCurves.sierpinski_curve(order),
+        'Keçeci':     KececiCurve(num_children=5, max_level=order,
+                                 base_radius=1.5, scale_factor=0.42).generate(),
+        'Peano':      ClassicalCurves.peano_curve(order),
+    }
+
+    scores = {}
+    np.random.seed(42)
+    for name, pts in curves.items():
+        pts = np.array(pts)
+        N = len(pts)
+        # Rastgele nokta çiftleri
+        idx = np.random.randint(0, N, (n_samples, 2))
+        # Aynı noktayı seçmemeye çalış
+        idx = idx[idx[:,0] != idx[:,1]]
+        i1, i2 = idx[:,0], idx[:,1]
+        idx_dist = np.abs(i1 - i2)
+        spatial_dist = np.linalg.norm(pts[i1] - pts[i2], axis=1)
+        # Pearson korelasyonu
+        corr = np.corrcoef(idx_dist, spatial_dist)[0,1]
+        scores[name] = corr
+
+    # Sırala (yüksek = iyi)
+    sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+    print("\nLokalite Skoru (Pearson korelasyon, yüksek = iyi):")
+    for name, corr in sorted_scores:
+        print(f"{name:<12}: {corr:.4f}")
+
+    # Çubuk grafik
+    plt.figure(figsize=(10, 5))
+    names = [x[0] for x in sorted_scores]
+    values = [x[1] for x in sorted_scores]
+    colors = [COMPARISON_DATA[n]['color'] for n in names]
+    plt.bar(names, values, color=colors)
+    plt.ylabel('Pearson Korelasyon', color='white')
+    plt.title('Lokalite Karşılaştırması (Korelasyon Metriği)', color='white')
+    plt.gca().set_facecolor('#0a0a1a')
+    plt.gcf().patch.set_facecolor('#0a0a1a')
+    plt.xticks(color='white')
+    plt.yticks(color='white')
+    plt.tight_layout()
+    plt.show()
+
+    return scores
+
+def locality_preservation_score(order=4):
+    """
+    Gerçek lokalite ölçümü: 
+    d1 = ardışık indeksli noktalar arası ortalama uzamsal mesafe
+    d2 = rastgele nokta çiftleri arası ortalama uzamsal mesafe
+    skor = d1 / d2   (düşük = iyi lokalite)
+    """
+    curves = {
+        'Hilbert':    ClassicalCurves.hilbert_curve(order),
+        'Morton':     ClassicalCurves.morton_curve(order),
+        'Moore':      ClassicalCurves.moore_curve(order),
+        'Sierpinski': ClassicalCurves.sierpinski_curve(order),
+        'Keçeci':     KececiCurve(num_children=5, max_level=order,
+                                 base_radius=1.5, scale_factor=0.42).generate(),
+        'Peano':      ClassicalCurves.peano_curve(order),
+    }
+
+    scores = {}
+    np.random.seed(42)
+    for name, pts in curves.items():
+        pts = np.array(pts)
+        N = len(pts)
+        # d1: ardışık noktalar arası mesafe
+        if N >= 2:
+            d1 = np.mean(np.linalg.norm(pts[1:] - pts[:-1], axis=1))
+        else:
+            d1 = 0.0
+        # d2: rastgele 10*N çiftin ortalama mesafesi (tüm çiftleri almak çok yavaş)
+        idx1 = np.random.randint(0, N, 10*N)
+        idx2 = np.random.randint(0, N, 10*N)
+        mask = idx1 != idx2
+        idx1, idx2 = idx1[mask], idx2[mask]
+        #d2 = np.mean(np.linalg.norm(pts[idx1] - pts[idx2], axis=1))
+        # Tüm çiftleri kullan (N < 5000 ise uygun)
+        from scipy.spatial.distance import pdist
+        d2 = np.mean(pdist(pts))   # tüm çiftler arası ortalama mesafe
+        scores[name] = d1 / d2 if d2 > 0 else 0.0
+
+    # Sırala (küçük = iyi)
+    sorted_scores = sorted(scores.items(), key=lambda x: x[1])
+    print("\nLokalite Skoru (d1/d2 oranı, düşük = iyi):")
+    for name, score in sorted_scores:
+        print(f"{name:<12}: {score:.4f}")
+
+    # Grafik
+    plt.figure(figsize=(10, 5))
+    names = [x[0] for x in sorted_scores]
+    values = [x[1] for x in sorted_scores]
+    colors = [COMPARISON_DATA[n]['color'] for n in names]
+    plt.bar(names, values, color=colors)
+    plt.ylabel('d1 / d2 (küçük = iyi)', color='white')
+    plt.title('Lokalite Karşılaştırması (Ardışık / Rastgele Mesafe Oranı)', color='white')
+    plt.gca().set_facecolor('#0a0a1a')
+    plt.gcf().patch.set_facecolor('#0a0a1a')
+    plt.xticks(color='white')
+    plt.yticks(color='white')
+    plt.tight_layout()
+    plt.show()
+
+    return scores
+
+def locality_spearman(order=4, n_samples=10000):
+    """
+    Gerçek lokalite ölçümü: Spearman sıra korelasyonu (yüksek = iyi).
+    """
+    curves = {
+        'Hilbert':    ClassicalCurves.hilbert_curve(order),
+        'Morton':     ClassicalCurves.morton_curve(order),
+        'Moore':      ClassicalCurves.moore_curve(order),
+        'Sierpinski': ClassicalCurves.sierpinski_curve(order),
+        'Keçeci':     KececiCurve(num_children=5, max_level=order,
+                                 base_radius=1.5, scale_factor=0.42).generate(),
+        'Peano':      ClassicalCurves.peano_curve(order),
+    }
+
+    scores = {}
+    np.random.seed(42)
+    for name, pts in curves.items():
+        pts = np.array(pts)
+        N = len(pts)
+        # Rastgele nokta çiftleri (10.000 çift yeterli)
+        idx1 = np.random.randint(0, N, n_samples)
+        idx2 = np.random.randint(0, N, n_samples)
+        mask = idx1 != idx2
+        idx1, idx2 = idx1[mask], idx2[mask]
+        idx_dist = np.abs(idx1 - idx2)
+        spatial_dist = np.linalg.norm(pts[idx1] - pts[idx2], axis=1)
+        # Spearman korelasyonu
+        corr, _ = spearmanr(idx_dist, spatial_dist)
+        scores[name] = corr
+
+    sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+    print("\nLokalite Skoru (Spearman korelasyonu, yüksek = iyi):")
+    for name, corr in sorted_scores:
+        print(f"{name:<12}: {corr:.4f}")
+
+    # Grafik
+    plt.figure(figsize=(10, 5))
+    names = [x[0] for x in sorted_scores]
+    values = [x[1] for x in sorted_scores]
+    colors = [COMPARISON_DATA[n]['color'] for n in names]
+    plt.bar(names, values, color=colors)
+    plt.ylabel('Spearman Korelasyonu', color='white')
+    plt.title('Lokalite Karşılaştırması (Spearman Sıra Korelasyonu)', color='white')
+    plt.gca().set_facecolor('#0a0a1a')
+    plt.gcf().patch.set_facecolor('#0a0a1a')
+    plt.xticks(color='white')
+    plt.yticks(color='white')
+    plt.tight_layout()
+    plt.show()
+
+    return scores
+
+def locality_spearman_normalized(order=4, n_samples=10000):
+    """
+    Lokalite ölçümü – tüm eğriler [0,1]x[0,1] karesine normalize edilir.
+    Spearman sıra korelasyonu (yüksek = iyi).
+    """
+    curves = {
+        'Hilbert':    ClassicalCurves.hilbert_curve(order),
+        'Morton':     ClassicalCurves.morton_curve(order),
+        'Moore':      ClassicalCurves.moore_curve(order),
+        'Sierpinski': ClassicalCurves.sierpinski_curve(order),
+        'Keçeci':     KececiCurve(num_children=5, max_level=order,
+                                 base_radius=1.5, scale_factor=0.42).generate(),
+        'Peano':      ClassicalCurves.peano_curve(order),
+    }
+
+    scores = {}
+    np.random.seed(42)
+    for name, pts in curves.items():
+        pts = np.array(pts)
+        
+        # ---------- NORMALİZASYON ----------
+        min_vals = pts.min(axis=0)
+        max_vals = pts.max(axis=0)
+        range_vals = max_vals - min_vals
+        # İki eksende aynı ölçeği kullanarak [0,1] aralığına getir (aspect korunur)
+        scale = range_vals.max()
+        pts_norm = (pts - min_vals) / scale
+        
+        N = len(pts_norm)
+        idx1 = np.random.randint(0, N, n_samples)
+        idx2 = np.random.randint(0, N, n_samples)
+        mask = idx1 != idx2
+        idx1, idx2 = idx1[mask], idx2[mask]
+        idx_dist = np.abs(idx1 - idx2)
+        spatial_dist = np.linalg.norm(pts_norm[idx1] - pts_norm[idx2], axis=1)
+        
+        corr, _ = spearmanr(idx_dist, spatial_dist)
+        scores[name] = corr
+
+    sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+    print("\nLokalite Skoru (Normalleştirilmiş Spearman, yüksek = iyi):")
+    for name, corr in sorted_scores:
+        print(f"{name:<12}: {corr:.4f}")
+
+    # Çubuk grafik
+    plt.figure(figsize=(10, 5))
+    names = [x[0] for x in sorted_scores]
+    values = [x[1] for x in sorted_scores]
+    colors = [COMPARISON_DATA[n]['color'] for n in names]
+    plt.bar(names, values, color=colors)
+    plt.ylabel('Spearman Korelasyonu', color='white')
+    plt.title('Lokalite (Normalleştirilmiş, Spearman)', color='white')
+    plt.gca().set_facecolor('#0a0a1a')
+    plt.gcf().patch.set_facecolor('#0a0a1a')
+    plt.xticks(color='white')
+    plt.yticks(color='white')
+    plt.tight_layout()
+    plt.show()
+
+    return scores
+
+def locality_powerlaw(order=4, max_k=1000):
+    """
+    Lokalite: uzamsal mesafe ~ (indeks farkı)^α
+    α ≈ 0.5 ideal. α'nın 0.5'e uzaklığına göre sıralama yapılır.
+    """
+    curves = {
+        'Hilbert': ClassicalCurves.hilbert_curve(order),
+        'Morton':  ClassicalCurves.morton_curve(order),
+        'Moore':   ClassicalCurves.moore_curve(order),
+        'Peano':   ClassicalCurves.peano_curve(order),
+        'Keçeci':  KececiCurve(num_children=5, max_level=order,
+                              base_radius=1.5, scale_factor=0.42).generate(),
+    }
+
+    alphas = {}
+    for name, pts in curves.items():
+        pts = np.array(pts)
+        # [0,1]×[0,1] karesine normalize et
+        min_vals = pts.min(axis=0)
+        max_vals = pts.max(axis=0)
+        scale = (max_vals - min_vals).max()
+        pts_norm = (pts - min_vals) / scale
+
+        N = len(pts_norm)
+        max_possible_k = min(N-1, max_k)
+        ks = np.arange(1, max_possible_k, step=max(1, max_possible_k//50))
+        mean_dists = []
+        for k in ks:
+            if k >= N: continue
+            # indeks farkı tam olarak k olan çiftlerin ortalama mesafesi
+            dists = np.linalg.norm(pts_norm[:-k] - pts_norm[k:], axis=1)
+            mean_dists.append(np.mean(dists))
+        ks = ks[:len(mean_dists)]
+        if len(ks) < 5:
+            alphas[name] = np.nan
+            continue
+        log_k = np.log(ks)
+        log_d = np.log(mean_dists)
+        slope, _, _, _, _ = linregress(log_k, log_d)
+        alphas[name] = slope
+
+    # 0.5'e mutlak uzaklığa göre sırala (küçük = iyi)
+    deviation = {k: abs(v - 0.5) for k, v in alphas.items() if not np.isnan(v)}
+    sorted_dev = sorted(deviation.items(), key=lambda x: x[1])
+    print("\nKuvvet Yasası Üssü (α) ve 0.5'ten sapma (küçük sapma = iyi lokalite):")
+    for name, dev in sorted_dev:
+        print(f"{name:<10}: α = {alphas[name]:.4f}  |α-0.5| = {dev:.4f}")
+
+    # Çubuk grafik (sapma)
+    plt.figure(figsize=(10, 5))
+    names = [x[0] for x in sorted_dev]
+    devs = [x[1] for x in sorted_dev]
+    colors = [COMPARISON_DATA[n]['color'] for n in names]
+    plt.bar(names, devs, color=colors)
+    plt.ylabel('|α - 0.5| (küçük = iyi)', color='white')
+    plt.title('Lokalite: Üs Sapması (0.5’e yakınlık)', color='white')
+    plt.gca().set_facecolor('#0a0a1a')
+    plt.gcf().patch.set_facecolor('#0a0a1a')
+    plt.xticks(color='white')
+    plt.yticks(color='white')
+    plt.tight_layout()
+    plt.show()
+
+    return alphas
+
+def locality_normalized_alpha(order=4, n_fractions=50):
+    """
+    Lokalite: uzamsal mesafe ~ (k/N)^α regresyonu.
+    α ≈ 0.5 ideal. |α - 0.5| küçük = iyi lokalite.
+    """
+    curves = {
+        'Hilbert': ClassicalCurves.hilbert_curve(order),
+        'Morton':  ClassicalCurves.morton_curve(order),
+        'Moore':   ClassicalCurves.moore_curve(order),
+        'Peano':   ClassicalCurves.peano_curve(order),
+        'Keçeci':  KececiCurve(num_children=5, max_level=order,
+                              base_radius=1.5, scale_factor=0.42).generate(),
+    }
+
+    alphas = {}
+    for name, pts in curves.items():
+        pts = np.array(pts)
+        # [0,1]×[0,1] karesine taşı (min‑max normalizasyon)
+        min_vals = pts.min(axis=0)
+        max_vals = pts.max(axis=0)
+        scale = (max_vals - min_vals).max()
+        pts_norm = (pts - min_vals) / scale
+
+        N = len(pts_norm)
+        # Fraksiyonel indeks farkları (log ölçekte eşit aralıklı)
+        fractions = np.logspace(np.log10(1/N), np.log10(0.5), n_fractions)
+        ks = np.unique(np.maximum(1, (fractions * N).astype(int)))
+        mean_dists = []
+        valid_ks = []
+        for k in ks:
+            if k >= N: continue
+            dists = np.linalg.norm(pts_norm[:-k] - pts_norm[k:], axis=1)
+            mean_dists.append(np.mean(dists))
+            valid_ks.append(k)
+        valid_ks = np.array(valid_ks)
+        mean_dists = np.array(mean_dists)
+        # Regresyon: log(d) = α * log(k/N) + c
+        log_f = np.log(valid_ks / N)
+        log_d = np.log(mean_dists)
+        slope, _, _, _, _ = linregress(log_f, log_d)
+        alphas[name] = slope
+
+    # 0.5'e mutlak uzaklığa göre sırala (küçük = iyi)
+    deviation = {k: abs(v - 0.5) for k, v in alphas.items()}
+    sorted_dev = sorted(deviation.items(), key=lambda x: x[1])
+    print("\nNormalleştirilmiş Kuvvet Yasası Üssü (α) ve 0.5'ten sapma:")
+    for name, dev in sorted_dev:
+        print(f"{name:<10}: α = {alphas[name]:.4f}  |α-0.5| = {dev:.4f}")
+
+    # Grafik
+    plt.figure(figsize=(10, 5))
+    names = [x[0] for x in sorted_dev]
+    devs = [x[1] for x in sorted_dev]
+    colors = [COMPARISON_DATA[n]['color'] for n in names]
+    plt.bar(names, devs, color=colors)
+    plt.ylabel('|α - 0.5| (küçük = iyi)', color='white')
+    plt.title('Lokalite: Normalleştirilmiş Üs Sapması', color='white')
+    plt.gca().set_facecolor('#0a0a1a')
+    plt.gcf().patch.set_facecolor('#0a0a1a')
+    plt.xticks(color='white')
+    plt.yticks(color='white')
+    plt.tight_layout()
+    plt.show()
+
+    return alphas
+
+def locality_combined(order=4, n_fractions=50):
+    """
+    α ve log‑regresyon RMSE'sini birlikte kullanır.
+    Birleşik skor: RMSE / (1 + |α-0.5|)  (küçük değer = iyi)
+    """
+    curves = {
+        'Hilbert': ClassicalCurves.hilbert_curve(order),
+        'Morton':  ClassicalCurves.morton_curve(order),
+        'Moore':   ClassicalCurves.moore_curve(order),
+        'Peano':   ClassicalCurves.peano_curve(order),
+        'Keçeci':  KececiCurve(num_children=5, max_level=order,
+                              base_radius=1.5, scale_factor=0.42).generate(),
+        'Sierpinski':   ClassicalCurves.sierpinski_curve(order),
+    }
+
+    results = {}
+    for name, pts in curves.items():
+        pts = np.array(pts)
+        # normalizasyon
+        min_vals = pts.min(axis=0)
+        max_vals = pts.max(axis=0)
+        scale = (max_vals - min_vals).max()
+        pts_norm = (pts - min_vals) / scale
+        N = len(pts_norm)
+
+        fractions = np.logspace(np.log10(1/N), np.log10(0.5), n_fractions)
+        ks = np.unique(np.maximum(1, (fractions * N).astype(int)))
+        mean_dists = []
+        valid_ks = []
+        for k in ks:
+            if k >= N: continue
+            dists = np.linalg.norm(pts_norm[:-k] - pts_norm[k:], axis=1)
+            mean_dists.append(np.mean(dists))
+            valid_ks.append(k)
+        valid_ks = np.array(valid_ks)
+        mean_dists = np.array(mean_dists)
+        log_f = np.log(valid_ks / N)
+        log_d = np.log(mean_dists)
+        slope, intercept, r_value, p_value, std_err = linregress(log_f, log_d)
+        alpha = slope
+        # RMSE (log‑ölçekte)
+        log_pred = alpha * log_f + intercept
+        rmse_log = np.sqrt(np.mean((log_d - log_pred)**2))
+        # Birleşik skor
+        combined = rmse_log / (1 + abs(alpha - 0.5))
+        results[name] = {'alpha': alpha, 'rmse_log': rmse_log, 'combined': combined}
+
+    # Birleşik skora göre sırala (küçük = iyi)
+    sorted_res = sorted(results.items(), key=lambda x: x[1]['combined'])
+    print("\nBirleşik Lokalite Skoru (küçük = iyi):")
+    for name, d in sorted_res:
+        print(f"{name:<10}: α={d['alpha']:.4f}  RMSE(log)={d['rmse_log']:.4f}  birleşik={d['combined']:.4f}")
+
+    # Grafik
+    plt.figure(figsize=(10,5))
+    names = [x[0] for x in sorted_res]
+    vals = [x[1]['combined'] for x in sorted_res]
+    colors = [COMPARISON_DATA[n]['color'] for n in names]
+    plt.bar(names, vals, color=colors)
+    plt.ylabel('Birleşik Skor (düşük = iyi)', color='white')
+    plt.title('Lokalite: α + RMSE Birleşik', color='white')
+    plt.gca().set_facecolor('#0a0a1a')
+    plt.gcf().patch.set_facecolor('#0a0a1a')
+    plt.xticks(color='white')
+    plt.yticks(color='white')
+    plt.tight_layout()
+    plt.show()
+    print("\nPuan karşılıkları (0-5):")
+    print("  0.00-0.03 → 5 (Mükemmel)")
+    print("  0.03-0.06 → 4 (Çok iyi)")
+    print("  0.06-0.08 → 3 (Orta)")
+    print("  0.08-0.12 → 2 (Düşük)")
+    print("  0.12+     → 1 (Çok düşük)")
+
+    return results
+
 def demonstrate_num_children_effect():
     """
     Farklı çocuk sayılarının Keçeci Eğrisi üzerindeki etkisini gösterir
@@ -1664,53 +2452,73 @@ def demonstrate_num_children_effect():
     plt.show()
 
 def demonstrate_growth_mode_effect():
-    """
-    Farklı büyüme modlarının etkisini gösterir
-    """
-    fig, axes = plt.subplots(1, 4, figsize=(20, 5))
+    fig, axes = plt.subplots(1, 4, figsize=(24, 6))
     fig.patch.set_facecolor('#0a0a1a')
-    
-    growth_modes = ['outward', 'inward', 'tangent', 'overlapping']
-    titles = ['Dışa Büyüme\n(outward)', 'İçe Büyüme\n(inward)', 
-              'Teğet Büyüme\n(tangent)', 'Örtüşmeli\n(overlapping)']
-    
-    for idx, (mode, title) in enumerate(zip(growth_modes, titles)):
+
+    modes = [GrowthDirection.OUTWARD, GrowthDirection.INWARD,
+             GrowthDirection.TANGENT, GrowthDirection.OVERLAPPING]
+    titles = ['Outward', 'Inward', 'Tangent', 'Overlapping']
+
+    # Referans olarak OUTWARD kullanıp global sınırları belirleyelim
+    ref_gen = KececiCurveGenerator(num_children=5, max_level=3,
+                                   scale_factor=0.4, base_radius=1.5,
+                                   growth_direction=GrowthDirection.OUTWARD)
+    ref_gen.generate_curve()
+    all_x = [p[0][0] for p in ref_gen.all_points]
+    all_y = [p[0][1] for p in ref_gen.all_points]
+    margin = 0.5
+    x_min, x_max = min(all_x) - margin, max(all_x) + margin
+    y_min, y_max = min(all_y) - margin, max(all_y) + margin
+
+    for idx, (mode, title) in enumerate(zip(modes, titles)):
         ax = axes[idx]
         ax.set_facecolor('#0a0a1a')
-        
-        curve = KececiCurve(
-            num_children=5,
-            max_level=3,
-            scale_factor=0.4,
-            base_radius=1.5,
-            growth_mode=mode,
-            ordering_mode='spiral'
-        )
-        points = curve.generate()
-        points = np.array(points)
-        
-        for i in range(len(points) - 1):
-            color = plt.cm.plasma(i / len(points))
-            ax.plot(points[i:i+2, 0], points[i:i+2, 1], '-', 
-                   color=color, linewidth=1.5, alpha=0.9)
-        
-        ax.scatter(points[0, 0], points[0, 1], color='white', s=80, marker='o', 
-                  edgecolor='cyan', linewidth=2, zorder=5)
-        ax.scatter(points[-1, 0], points[-1, 1], color='yellow', s=80, marker='s', 
-                  edgecolor='orange', linewidth=2, zorder=5)
-        
-        ax.set_title(title, color='white', fontsize=12)
+
+        gen = KececiCurveGenerator(num_children=5, max_level=3,
+                                   scale_factor=0.4, base_radius=1.5,
+                                   growth_direction=mode,
+                                   child_ordering=ChildOrdering.SPIRAL_OUTWARD,
+                                   color_by_angle=True, line_width=1.5)
+        gen.generate_curve()
+        pts = sorted(gen.all_points, key=lambda p: (p[1], p[2]))
+        xs = [p[0][0] for p in pts]
+        ys = [p[0][1] for p in pts]
+
+        for i in range(len(xs)-1):
+            color = gen._get_color(pts[i][1], pts[i][2])
+            ax.plot(xs[i:i+2], ys[i:i+2], '-', color=color, linewidth=1.5, alpha=0.9)
+
+        ax.scatter(xs[0], ys[0], color='white', s=80, marker='o',
+                   edgecolor='cyan', linewidth=2, zorder=5)
+        ax.scatter(xs[-1], ys[-1], color='yellow', s=80, marker='s',
+                   edgecolor='orange', linewidth=2, zorder=5)
+
+        ax.set_title(f"{title}\n({len(pts)} nokta)", color='white', fontsize=12)
         ax.set_aspect('equal')
-        ax.set_xticks([])
-        ax.set_yticks([])
-        
+        ax.axis('off')
         for spine in ax.spines.values():
             spine.set_color('#333366')
-    
-    plt.suptitle("Keçeci Eğrisi - Büyüme Modunun Etkisi", 
-                color='white', fontsize=14, fontweight='bold', y=1.05)
+
+        # Otomatik ölçeklendirmeyi kapat ve sabit sınırları uygula
+        ax.autoscale_view(False)
+        ax.set_xlim(x_min, x_max)
+        ax.set_ylim(y_min, y_max)
+
+    plt.suptitle("Keçeci Eğrisi – Büyüme Modunun Etkisi (Aynı Ölçek)",
+                 color='white', fontsize=16, fontweight='bold', y=1.02)
     plt.tight_layout()
     plt.show()
+
+    names = ['OUTWARD', 'INWARD', 'TANGENT', 'OVERLAPPING']
+    for mode, name in zip(modes, names):
+        gen = KececiCurveGenerator(
+            num_children=5, max_level=1, scale_factor=0.4,
+            base_radius=1.5, growth_direction=mode
+        )
+        gen.generate_curve()
+        # İlk 3 noktayı yazdır
+        pts = [p[0] for p in gen.all_points[:3]]
+        print(f"{name}: {pts}")
 
 def demonstrate_ordering_mode_effect():
     """
@@ -2066,7 +2874,7 @@ def plot_sierpinski_curve(order: int):
     return fig
 
 
-def plot_sierpinski_evolution():
+def plot_sierpinski_process():
     """Farklı seviyelerde Sierpinski eğrisinin gelişimi"""
     fig, axes = plt.subplots(1, 4, figsize=(20, 5))
     fig.patch.set_facecolor('#0a0a1a')
@@ -2130,6 +2938,32 @@ def ciz_sierpinski(derinlik, p1, p2, p3, eksen):
     ciz_sierpinski(derinlik - 1, m1, p2, m2, eksen)
     # Sağ alt üçgen
     ciz_sierpinski(derinlik - 1, m3, m2, p3, eksen)
+
+def plot_sierpinski_triangle(derinlik: int = 4):
+    """
+    Sierpinski üçgeni çizimi için hazırlık yapar ve çizimi başlatır.
+    """
+    fig, ax = plt.subplots(figsize=(8, 8))
+    fig.patch.set_facecolor('#0a0a1a')
+    ax.set_facecolor('#0a0a1a')
+    
+    # Eşkenar üçgen köşeleri
+    size = 2.0
+    h = size * np.sqrt(3) / 2
+    p1 = (0.0, h)            # Üst köşe
+    p2 = (-size/2, 0.0)      # Sol alt
+    p3 = (size/2, 0.0)       # Sağ alt
+    
+    # Sierpinski çizimini başlat
+    ciz_sierpinski(derinlik, p1, p2, p3, ax)
+    
+    ax.set_xlim(-size, size)
+    ax.set_ylim(-0.2, h + 0.2)
+    ax.set_aspect('equal')
+    ax.axis('off')
+    ax.set_title(f"Sierpinski Üçgeni (derinlik={derinlik})", color='white')
+    plt.tight_layout()
+    plt.show()
     
 def test_sierpinski():
     """Sierpinski eğrisi testi"""
@@ -2318,7 +3152,7 @@ class KececiCurveGenerator:
             elif self.growth_direction == GrowthDirection.TANGENT:
                 distance = radius
             elif self.growth_direction == GrowthDirection.OVERLAPPING:
-                distance = radius * 0.8
+                distance = radius * 0.8   # veya radius * (1 - scale_factor*0.5)
             else:  # OUTWARD
                 distance = radius + child_radius
             
@@ -5021,7 +5855,7 @@ class QuantumKececiCurve:
             ax.text(0.02, 0.98, label, transform=ax.transAxes,
                    color='white', fontsize=10, verticalalignment='top')
     
-    def create_superposition_state(self, num_states: int = 3):
+    def generate_superposition_state(self, num_states: int = 3):
         """Süperpozisyon durumu"""
         fig, axes = plt.subplots(1, 3, figsize=(18, 6))
         fig.patch.set_facecolor('#0a0a1a')
@@ -5089,7 +5923,7 @@ class QuantumKececiCurve:
         plt.show()
         self.figures.append(fig)
     
-    def create_entanglement_state(self):
+    def generate_entanglement_state(self):
         """Dolanıklık durumu - Bell durumları"""
         fig, axes = plt.subplots(2, 2, figsize=(14, 14))
         fig.patch.set_facecolor('#0a0a1a')
@@ -5140,7 +5974,7 @@ class QuantumKececiCurve:
         plt.show()
         self.figures.append(fig)
     
-    def create_coherence_decoherence(self):
+    def generate_coherence_decoherence(self):
         """Koherens → Dekoherens geçişi"""
         fig, axes = plt.subplots(1, 4, figsize=(20, 5))
         fig.patch.set_facecolor('#0a0a1a')
@@ -5182,7 +6016,7 @@ class QuantumKececiCurve:
         plt.show()
         self.figures.append(fig)
     
-    def create_quantum_tunneling(self):
+    def generate_quantum_tunneling(self):
         """Kuantum tünelleme"""
         fig, axes = plt.subplots(1, 3, figsize=(18, 6))
         fig.patch.set_facecolor('#0a0a1a')
@@ -5235,7 +6069,7 @@ class QuantumKececiCurve:
         plt.show()
         self.figures.append(fig)
     
-    def create_interference_pattern(self):
+    def generate_interference_pattern(self):
         """Girişim deseni"""
         fig, axes = plt.subplots(2, 2, figsize=(14, 14))
         fig.patch.set_facecolor('#0a0a1a')
@@ -5284,7 +6118,7 @@ class QuantumKececiCurve:
         plt.show()
         self.figures.append(fig)
     
-    def create_wave_function_collapse(self):
+    def generate_wave_function_collapse(self):
         """Dalga fonksiyonu çöküşü"""
         fig, axes = plt.subplots(1, 3, figsize=(18, 6))
         fig.patch.set_facecolor('#0a0a1a')
@@ -5361,7 +6195,7 @@ class QuantumKececiCurve:
         plt.show()
         self.figures.append(fig)
 
-def create_kececi_curve_gallery():
+def generate_kececi_curve_gallery():
     """
     Farklı parametre kombinasyonları ile özgün Keçeci Eğrileri galerisi oluştur
     """
@@ -5644,68 +6478,156 @@ def peano_test(order: int = 3):
     print(f"{'='*60}\n")
 
 def show_menu():
-    """Kullanıcı menüsü - tüm görselleştirme seçeneklerini listeler"""
+    """Kullanıcı menüsü – İngilizce + Türkçe, konularına göre gruplandırılmış"""
     menu_options = {
-        '1': ('Çiçek Desenleri', flower_patterns),
-        '2': ('Galaksi Desenleri', galaxy_patterns),
-        '3': ('Kar Taneleri', snowflake_patterns),
-        '4': ('Mandala Desenleri', mandala_patterns),
-        '5': ('Fraktal Ağaçlar', fractal_trees),
-        '6': ('Deniz Canlıları', marine_patterns),
-        '7': ('Kozmik Ağ', cosmic_web),
-        '8': ('Sinir Ağı Desenleri', neural_network_patterns),
-        '9': ('Virüs Desenleri', virus_patterns),
-        '10': ('Lokalite Isı Haritası', locality_heatmap_comparison),
-        '11': ('Süreklilik Görselleştirmesi', continuity_visualization_v2),
-        '12': ('Radar Grafik Karşılaştırması', radar_chart_comparison),
-        '13': ('Sierpinski Karşılaştırması', lambda: plot_sierpinski_comparison(3)),
-        '14': ('Majorana Görselleştirmeleri', lambda: MajoranaVisualizer().visualize_majorana_zero_modes()),
-        '15': ('Weyl Yarımetali', lambda: WeylVisualizer().visualize_weyl_semimetal()),
-        '16': ('Stratum Mimarisi', lambda: StratumModelVisualizer().visualize_stratum_architecture()),
-        '17': ('3B Wigner Fonksiyonu', lambda: Rich3DQuantumVisualizer().visualize_wigner_function_3d()),
-        '18': ('Dolanıklık Ağı 3B', lambda: Rich3DQuantumVisualizer().visualize_entanglement_network_3d()),
-        '19': ('Shor Algoritması', lambda: AdvancedQuantumVisualizer().visualize_shor_algorithm()),
-        '20': ('Grover Algoritması', lambda: AdvancedQuantumVisualizer().visualize_grover_algorithm()),
-        '21': ('Deutsch-Jozsa', lambda: AdvancedQuantumVisualizer().visualize_deutsch_jozsa()),
-        '22': ('Kuantum Hata Düzeltme', lambda: AdvancedQuantumVisualizer().visualize_quantum_error_correction()),
-        '23': ('Keçeci Eğri Galerisi', create_kececi_curve_gallery),
-        '24': ('Kuantum Durumları (Süperpozisyon)', lambda: QuantumKececiCurve().create_superposition_state()),
-        '25': ('Kuantum Dolanıklık', lambda: QuantumKececiCurve().create_entanglement_state()),
-        '26': ('Koherens/Dekoherens', lambda: QuantumKececiCurve().create_coherence_decoherence()),
-        '27': ('Kuantum Tünelleme', lambda: QuantumKececiCurve().create_quantum_tunneling()),
-        '28': ('Girişim Deseni', lambda: QuantumKececiCurve().create_interference_pattern()),
-        '29': ('Dalga Fonksiyonu Çöküşü', lambda: QuantumKececiCurve().create_wave_function_collapse()),
-        '30': ('Başlangıç-Bitiş Karşılaştırması', lambda: CurveComparisonVisualizer().create_start_end_comparison()),
-        '31': ('Kapsamlı Karşılaştırma (Tablo)', lambda: CurveComparisonVisualizer().create_comprehensive_comparison()),
-        '32': ('Peano Eğrisi', lambda: plot_peano_curve(3)),
-        '33': ('Peano Doğrulama Testi', lambda: peano_test(3)),
-        '0': ('Çıkış', None)
+        # ===================== DESEN GALERİLERİ / PATTERN GALLERIES =====================
+        '1':  ('Flower Patterns / Çiçek Desenleri', flower_patterns),
+        '2':  ('Galaxy Patterns / Galaksi Desenleri', galaxy_patterns),
+        '3':  ('Snowflake Patterns / Kar Taneleri', snowflake_patterns),
+        '4':  ('Mandala Patterns / Mandala Desenleri', mandala_patterns),
+        '5':  ('Fractal Trees / Fraktal Ağaçlar', fractal_trees),
+        '6':  ('Marine Patterns / Deniz Canlıları', marine_patterns),
+        '7':  ('Cosmic Web / Kozmik Ağ', cosmic_web),
+        '8':  ('Neural Network Patterns / Sinir Ağı Desenleri', neural_network_patterns),
+        '9':  ('Virus Patterns / Virüs Desenleri', virus_patterns),
+        '10': ('Keçeci Curve Gallery / Keçeci Eğri Galerisi', generate_kececi_curve_gallery),
+
+        # ===================== EĞRİ KARŞILAŞTIRMALARI / CURVE COMPARISONS =====================
+        '11': ('Locality Heatmap / Lokalite Isı Haritası', locality_heatmap_comparison),
+        '12': ('Continuity Visualization / Süreklilik Görselleştirmesi', continuity_visualization_v2),
+        '13': ('Radar Chart Comparison / Radar Grafik Karşılaştırması', radar_chart_comparison),
+        '14': ('Start-End Comparison / Başlangıç-Bitiş Karşılaştırması',
+               lambda: CurveComparisonVisualizer().generate_start_end_comparison()),
+        '15': ('Comprehensive Comparison (Table) / Kapsamlı Karşılaştırma (Tablo)',
+               lambda: CurveComparisonVisualizer().generate_comprehensive_comparison()),
+        #'16': ('Locality Heatmap – Both Normalizations / Lokalite Isı Haritası – İki Normalizasyon', lambda: locality_random_sampling(4, 2000)),
+        #'16': ('Locality Correlation / Lokalite Korelasyonu', lambda: locality_correlation(4, 5000)),        
+        #'16': ('Locality Preservation Score / Lokalite Koruma Skoru', lambda: locality_preservation_score(4)),
+        #'16': ('Locality Spearman / Lokalite Spearman', lambda: locality_spearman(4, 10000)),
+        #'16': ('Locality Spearman (Normalized) / Lokalite Spearman (Normalleştirilmiş)', lambda: locality_spearman_normalized(4, 1000)), 
+        #'16': ('Locality Power Law / Lokalite Kuvvet Yasası', lambda: locality_powerlaw(4, 10000)), 
+        #'16': ('Locality Normalized Alpha / Lokalite Normalleştirilmiş Üs', lambda: locality_normalized_alpha(4, 50)),
+        '16': ('Locality Combined Score / Lokalite Birleşik Skoru', lambda: locality_combined(4, 50)), # en iyi sonuç
+        '17': ('Indexing Performance Comparison / Veri İndeksleme Karşılaştırması',
+               indexing_performance_comparison),
+
+        # ===================== KUANTUM GÖRSELLEŞTİRMELERİ / QUANTUM VISUALIZATIONS =====================
+        '18': ('Majorana Zero Modes / Majorana Sıfır Modları',
+               lambda: MajoranaVisualizer().visualize_majorana_zero_modes()),
+        '19': ('Weyl Semimetal / Weyl Yarımetali',
+               lambda: WeylVisualizer().visualize_weyl_semimetal()),
+        '20': ('Stratum Architecture / Stratum Mimarisi',
+               lambda: StratumModelVisualizer().visualize_stratum_architecture()),
+        '21': ('3D Wigner Function / 3B Wigner Fonksiyonu',
+               lambda: Rich3DQuantumVisualizer().visualize_wigner_function_3d()),
+        '22': ('Entanglement Network 3D / Dolanıklık Ağı 3B',
+               lambda: Rich3DQuantumVisualizer().visualize_entanglement_network_3d()),
+        '23': ('Adiabatic Evolution 3D / Adiabatik Kuantum Evrimi 3B',
+               lambda: Rich3DQuantumVisualizer().visualize_adiabatic_evolution_3d()),
+        '24': ('Topological Anyons 3D / Topolojik Anyonlar 3B',
+               lambda: Rich3DQuantumVisualizer().visualize_topological_anyons_3d()),
+        '25': ('QFT Spectrum 3D / Kuantum Fourier Dönüşümü 3B',
+               lambda: Rich3DQuantumVisualizer().visualize_qft_spectrum_3d()),
+
+        # ===================== KUANTUM ALGORİTMALARI / QUANTUM ALGORITHMS =====================
+        '26': ('Shor Algorithm / Shor Algoritması',
+               lambda: AdvancedQuantumVisualizer().visualize_shor_algorithm()),
+        '27': ('Grover Algorithm / Grover Algoritması',
+               lambda: AdvancedQuantumVisualizer().visualize_grover_algorithm()),
+        '28': ('Deutsch-Jozsa Algorithm / Deutsch-Jozsa Algoritması',
+               lambda: AdvancedQuantumVisualizer().visualize_deutsch_jozsa()),
+        '29': ('Quantum Error Correction / Kuantum Hata Düzeltme',
+               lambda: AdvancedQuantumVisualizer().visualize_quantum_error_correction()),
+        '30': ('Bloch Sphere States / Bloch Küresi Durumları',
+               lambda: AdvancedQuantumVisualizer().visualize_bloch_sphere_states()),
+        '31': ('Superposition States / Süperpozisyon Durumları',
+               lambda: QuantumKececiCurve().generate_superposition_state()),
+        '32': ('Entanglement (Bell States) / Dolanıklık (Bell Durumları)',
+               lambda: QuantumKececiCurve().generate_entanglement_state()),
+        '33': ('Coherence → Decoherence / Koherens → Dekoherens',
+               lambda: QuantumKececiCurve().generate_coherence_decoherence()),
+        '34': ('Quantum Tunneling / Kuantum Tünelleme',
+               lambda: QuantumKececiCurve().generate_quantum_tunneling()),
+        '35': ('Interference Patterns / Girişim Desenleri',
+               lambda: QuantumKececiCurve().generate_interference_pattern()),
+        '36': ('Wave Function Collapse / Dalga Fonksiyonu Çöküşü',
+               lambda: QuantumKececiCurve().generate_wave_function_collapse()),
+
+        # ===================== KEÇECİ PARAMETRE ETKİLERİ / KEÇECİ PARAMETER EFFECTS =====================
+        '37': ('Effect of Child Count / Çocuk Sayısının Etkisi', demonstrate_num_children_effect),
+        '38': ('Effect of Growth Mode / Büyüme Modunun Etkisi', demonstrate_growth_mode_effect),
+        '39': ('Effect of Ordering Strategy / Sıralama Stratejisinin Etkisi', demonstrate_ordering_mode_effect),
+        '40': ('Effect of Scale Factor / Ölçek Faktörünün Etkisi', demonstrate_scale_factor_effect),
+        '41': ('Effect of Angle Parameters / Açı Parametrelerinin Etkisi', demonstrate_angle_effects),
+
+        # ===================== SİERPİNSKİ & PEANO ÖZEL / SIERPINSKI & PEANO SPECIALS =====================
+        '42': ('Sierpinski Comparison / Sierpinski Karşılaştırması',
+               lambda: plot_sierpinski_comparison(3)),
+        '43': ('Sierpinski Curve / Sierpinski Eğrisi',
+               lambda: plot_sierpinski_curve(3)),
+        '44': ('Sierpinski Process / Sierpinski Gelişimi',
+               plot_sierpinski_process),
+        '45': ('Sierpinski Triangle / Sierpinski Üçgeni',
+               lambda: plot_sierpinski_triangle(4)),
+        '46': ('Sierpinski Test / Sierpinski Doğrulama Testi',
+               test_sierpinski),
+        '47': ('Peano Curve / Peano Eğrisi',
+               lambda: plot_peano_curve(3)),
+        '48': ('Peano Verification Test / Peano Doğrulama Testi',
+               lambda: peano_test(3)),
+        # ===================== Other/Diğerleri =====================
+        '49': ('Uzay Doldurma eğrilerinin Seviyeye Göre Değişimi',
+               lambda: CurveComparisonVisualizer().generate_process_comparison()),
+        '50': ('Uzay Doldurma Eğrilerinde Lokalite (Yerellik) Karşılaştırması',
+               lambda: CurveComparisonVisualizer().generate_connectivity_comparison()),
+        '51': ('Keçeci Eğrisinin Parametrik Varyasyonları',
+               lambda: CurveComparisonVisualizer().generate_kececi_variations()),
+        '52': ('generate_radar_comparison',
+               lambda: CurveComparisonVisualizer().generate_radar_comparison()),
+        '53': ('Locality Heatmap – Both Normalizations / Lokalite Isı Haritası – İki Normalizasyon', locality_heatmap_both_versions),
     }
-    
+
+    # Grup başlıkları (ekrana yazdırmak için)
+    groups = [
+        ("DESEN GALERİLERİ / PATTERN GALLERIES", range(1, 11)),
+        ("EĞRİ KARŞILAŞTIRMALARI / CURVE COMPARISONS", range(11, 18)),
+        ("KUANTUM GÖRSELLEŞTİRMELERİ / QUANTUM VISUALIZATIONS", range(18, 26)),
+        ("KUANTUM ALGORİTMALARI / QUANTUM ALGORITHMS", range(26, 37)),
+        ("KEÇECİ PARAMETRE ETKİLERİ / KEÇECİ PARAMETER EFFECTS", range(37, 42)),
+        ("SİERPİNSKİ & PEANO ÖZEL / SIERPINSKI & PEANO SPECIALS", range(42, 49)),
+        ("Other/Diğerleri", range(49, 54)),
+    ]
+
     while True:
         print("\n" + "="*70)
-        print(" "*20 + "KEÇECİ CURVE GÖRSELLEŞTİRME MENÜSÜ")
+        print(" "*15 + "KEÇECİ CURVE GÖRSELLEŞTİRME MENÜSÜ")
         print("="*70)
-        for key, (desc, _) in menu_options.items():
-            print(f" {key:>2}. {desc}")
-        print("-"*70)
-        
-        choice = input("Seçiminiz (0-33): ").strip()
-        
+
+        for group_title, num_range in groups:
+            print(f"\n  {group_title}")
+            print("  " + "-"*68)
+            for num in num_range:
+                key = str(num)
+                if key in menu_options:
+                    desc, _ = menu_options[key]
+                    print(f"  {num:>2}. {desc}")
+
+        print("\n  " + "-"*68)
+        print("   0. Exit / Çıkış")
+        print("="*70)
+
+        choice = input("Seçiminiz (0-53): ").strip()
+
         if choice == '0':
-            print("Programdan çıkılıyor...")
+            print("Programdan çıkılıyor... / Exiting...")
             break
         elif choice in menu_options:
-            func = menu_options[choice][1]
-            if func:
-                print(f"\n{menu_options[choice][0]} çalıştırılıyor...")
-                try:
-                    func()
-                except Exception as e:
-                    print(f"Hata oluştu: {e}")
-                input("\nDevam etmek için Enter'a basın...")
+            desc, func = menu_options[choice]
+            print(f"\n{desc} çalıştırılıyor... / running...")
+            try:
+                func()
+            except Exception as e:
+                print(f"Hata / Error: {e}")
+            input("\nDevam etmek için Enter'a basın... / Press Enter to continue...")
         else:
-            print("Geçersiz seçim! Lütfen listeden bir sayı girin.")
-
-if __name__ == "__main__":
-    show_menu()
+            print("Geçersiz seçim! Lütfen listeden bir sayı girin. / Invalid choice! Please enter a number from the list.")
