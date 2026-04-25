@@ -178,45 +178,90 @@ show_menu()
 
 Bu interaktif menü, **çiçek desenlerinden kuantum algoritmalarına** kadar 30'dan fazla görselleştirme seçeneği sunar.
 
-KEÇECİ CURVE GÖRSELLEŞTİRME MENÜSÜ
-======================================================================
-1. Çiçek Desenleri
-  2. Galaksi Desenleri
-  3. Kar Taneleri
-  4. Mandala Desenleri
-  5. Fraktal Ağaçlar
-  6. Deniz Canlıları
-  7. Kozmik Ağ
-  8. Sinir Ağı Desenleri
-  9. Virüs Desenleri
- 10. Lokalite Isı Haritası
- 11. Süreklilik Görselleştirmesi
- 12. Radar Grafik Karşılaştırması
- 13. Sierpinski Karşılaştırması
- 14. Majorana Görselleştirmeleri
- 15. Weyl Yarımetali
- 16. Stratum Mimarisi
- 17. 3B Wigner Fonksiyonu
- 18. Dolanıklık Ağı 3B
- 19. Shor Algoritması
- 20. Grover Algoritması
- 21. Deutsch-Jozsa
- 22. Kuantum Hata Düzeltme
- 23. Keçeci Eğri Galerisi
- 24. Kuantum Durumları (Süperpozisyon)
- 25. Kuantum Dolanıklık
- 26. Koherens/Dekoherens
- 27. Kuantum Tünelleme
- 28. Girişim Deseni
- 29. Dalga Fonksiyonu Çöküşü
- 30. Başlangıç-Bitiş Karşılaştırması
- 31. Kapsamlı Karşılaştırma (Tablo)
- 32. Peano Eğrisi
- 33. Peano Doğrulama Testi
-  0. Çıkış
-----------------------------------------------------------------------
 
-Seçiminiz (0-31):  31
+======================================================================
+               KEÇECİ CURVE GÖRSELLEŞTİRME MENÜSÜ
+======================================================================
+
+  DESEN GALERİLERİ / PATTERN GALLERIES
+  --------------------------------------------------------------------
+   1. Flower Patterns / Çiçek Desenleri
+   2. Galaxy Patterns / Galaksi Desenleri
+   3. Snowflake Patterns / Kar Taneleri
+   4. Mandala Patterns / Mandala Desenleri
+   5. Fractal Trees / Fraktal Ağaçlar
+   6. Marine Patterns / Deniz Canlıları
+   7. Cosmic Web / Kozmik Ağ
+   8. Neural Network Patterns / Sinir Ağı Desenleri
+   9. Virus Patterns / Virüs Desenleri
+  10. Keçeci Curve Gallery / Keçeci Eğri Galerisi
+
+  EĞRİ KARŞILAŞTIRMALARI / CURVE COMPARISONS
+  --------------------------------------------------------------------
+  11. Locality Heatmap / Lokalite Isı Haritası
+  12. Continuity Visualization / Süreklilik Görselleştirmesi
+  13. Radar Chart Comparison / Radar Grafik Karşılaştırması
+  14. Start-End Comparison / Başlangıç-Bitiş Karşılaştırması
+  15. Comprehensive Comparison (Table) / Kapsamlı Karşılaştırma (Tablo)
+  16. Locality Combined Score / Lokalite Birleşik Skoru
+  17. Indexing Performance Comparison / Veri İndeksleme Karşılaştırması
+
+  KUANTUM GÖRSELLEŞTİRMELERİ / QUANTUM VISUALIZATIONS
+  --------------------------------------------------------------------
+  18. Majorana Zero Modes / Majorana Sıfır Modları
+  19. Weyl Semimetal / Weyl Yarımetali
+  20. Stratum Architecture / Stratum Mimarisi
+  21. 3D Wigner Function / 3B Wigner Fonksiyonu
+  22. Entanglement Network 3D / Dolanıklık Ağı 3B
+  23. Adiabatic Evolution 3D / Adiabatik Kuantum Evrimi 3B
+  24. Topological Anyons 3D / Topolojik Anyonlar 3B
+  25. QFT Spectrum 3D / Kuantum Fourier Dönüşümü 3B
+
+  KUANTUM ALGORİTMALARI / QUANTUM ALGORITHMS
+  --------------------------------------------------------------------
+  26. Shor Algorithm / Shor Algoritması
+  27. Grover Algorithm / Grover Algoritması
+  28. Deutsch-Jozsa Algorithm / Deutsch-Jozsa Algoritması
+  29. Quantum Error Correction / Kuantum Hata Düzeltme
+  30. Bloch Sphere States / Bloch Küresi Durumları
+  31. Superposition States / Süperpozisyon Durumları
+  32. Entanglement (Bell States) / Dolanıklık (Bell Durumları)
+  33. Coherence → Decoherence / Koherens → Dekoherens
+  34. Quantum Tunneling / Kuantum Tünelleme
+  35. Interference Patterns / Girişim Desenleri
+  36. Wave Function Collapse / Dalga Fonksiyonu Çöküşü
+
+  KEÇECİ PARAMETRE ETKİLERİ / KEÇECİ PARAMETER EFFECTS
+  --------------------------------------------------------------------
+  37. Effect of Child Count / Çocuk Sayısının Etkisi
+  38. Effect of Growth Mode / Büyüme Modunun Etkisi
+  39. Effect of Ordering Strategy / Sıralama Stratejisinin Etkisi
+  40. Effect of Scale Factor / Ölçek Faktörünün Etkisi
+  41. Effect of Angle Parameters / Açı Parametrelerinin Etkisi
+
+  SİERPİNSKİ & PEANO ÖZEL / SIERPINSKI & PEANO SPECIALS
+  --------------------------------------------------------------------
+  42. Sierpinski Comparison / Sierpinski Karşılaştırması
+  43. Sierpinski Curve / Sierpinski Eğrisi
+  44. Sierpinski Process / Sierpinski Gelişimi
+  45. Sierpinski Triangle / Sierpinski Üçgeni
+  46. Sierpinski Test / Sierpinski Doğrulama Testi
+  47. Peano Curve / Peano Eğrisi
+  48. Peano Verification Test / Peano Doğrulama Testi
+
+  EK KARŞILAŞTIRMA VE ANALİZLER / ADDITIONAL COMPARISONS & ANALYSES
+  --------------------------------------------------------------------
+  49. Curve Evolution by Level / Eğrilerin Seviyeye Göre Gelişimi
+  50. Connectivity & Locality / Bağlantılılık ve Lokalite
+  51. Keçeci Parametric Variations / Keçeci Parametrik Varyasyonları
+  52. Detailed Radar Comparison / Detaylı Radar Karşılaştırması
+  53. Locality Heatmap – Both Normalizations / Lokalite Isı Haritası – İki Normalizasyon
+
+  --------------------------------------------------------------------
+   0. Exit / Çıkış
+======================================================================
+
+Seçiminiz (0-53):
 
 
 ---
