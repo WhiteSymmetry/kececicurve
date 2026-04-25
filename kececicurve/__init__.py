@@ -37,6 +37,13 @@ from .kececicurve import (
     virus_patterns,
     peano_test,
     plot_peano_curve,
+    locality_heatmap_both_versions,
+    demonstrate_num_children_effect,
+    demonstrate_growth_mode_effect,
+    demonstrate_ordering_mode_effect,
+    demonstrate_scale_factor_effect,
+    demonstrate_angle_effects,
+    COMPARISON_DATA,
     
     # Karşılaştırma görselleştirmeleri
     locality_heatmap_comparison,
@@ -46,7 +53,11 @@ from .kececicurve import (
     # Sierpinski görselleştirmeleri
     plot_sierpinski_comparison,
     plot_sierpinski_curve,
-    plot_sierpinski_evolution,
+    plot_sierpinski_curve,
+    plot_sierpinski_process,
+    ciz_sierpinski,
+    test_sierpinski,
+    plot_sierpinski_triangle,
     
     # Kuantum görselleştirme sınıfları
     MajoranaVisualizer,
@@ -57,7 +68,7 @@ from .kececicurve import (
     QuantumKececiCurve,
     
     # Galeri
-    create_kececi_curve_gallery,
+    generate_kececi_curve_gallery,
     
     # Menü
     show_menu,
@@ -86,17 +97,28 @@ __all__ = [
     "locality_heatmap_comparison",
     "continuity_visualization_v2",
     "radar_chart_comparison",
-    "plot_sierpinski_comparison",
-    "plot_sierpinski_curve",
-    "plot_sierpinski_evolution",
     "MajoranaVisualizer",
     "WeylVisualizer",
     "StratumModelVisualizer",
     "Rich3DQuantumVisualizer",
     "AdvancedQuantumVisualizer",
     "QuantumKececiCurve",
-    "create_kececi_curve_gallery",
+    "generate_kececi_curve_gallery",
     "peano_test",
     "plot_peano_curve",
+    "locality_heatmap_both_versions",
+    "demonstrate_num_children_effect",
+    "demonstrate_growth_mode_effect",
+    "demonstrate_ordering_mode_effect",
+    "demonstrate_scale_factor_effect",
+    "demonstrate_angle_effects",
+    "plot_sierpinski_comparison",
+    "plot_sierpinski_curve",
+    "plot_sierpinski_curve",
+    "plot_sierpinski_process",
+    "ciz_sierpinski",
+    "test_sierpinski",
+    "plot_sierpinski_triangle",
+    "COMPARISON_DATA",
     "show_menu",
 ]
