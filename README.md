@@ -257,6 +257,19 @@ Bu interaktif menü, **çiçek desenlerinden kuantum algoritmalarına** kadar 30
   52. Detailed Radar Comparison / Detaylı Radar Karşılaştırması
   53. Locality Heatmap – Both Normalizations / Lokalite Isı Haritası – İki Normalizasyon
 
+  KRİPTOGRAFİ / CRYPTOGRAPHY
+  --------------------------------------------------------------------
+  54. Görüntü Şifreleme/Deşifreleme (Encrypt/Decrypt)
+  55. Görüntü İmzalama ve Doğrulama (Signature & Verify)
+  56. Keçeci Örnekleme RNG (Sampling RNG)
+  57. Görüntüden Anahtar Türetme (Key Derivation)
+  58. Toplu Görüntü Şifreleme (Batch Encrypt)
+  59. Permütasyon Parametrelerini Anahtar Olarak Kullanma
+
+  🎮 OYUN / GAME
+  --------------------------------------------------------------------
+  60. 🐢 Kaplumbağa Ninja vs 🐇 Beyaz Tavşan Oyunu (Rastgele Sayı Tahmin)
+
   --------------------------------------------------------------------
    0. Exit / Çıkış
 ======================================================================
@@ -430,5 +443,15 @@ If this library was useful to you in your research, please cite us. Following th
 
 ```
 
+Keçeci, M. (2026). Keçeci Curve: A Circular-Based Parametric Space-Filling Curve Family. Open Science Articles (OSAs), Zenodo. https://doi.org/10.5281/zenodo.19885259
+
+Keçeci, M. (2026). Keçeci Eğrisi: Dairesel Temelli Parametrik Bir Uzay Doldurma Eğrisi Âilesi. Open Science Articles (OSAs), Zenodo. https://doi.org/10.5281/zenodo.19796065
+
+Keçeci, M. (2026). Space-Filling Curves for Quantum Computing: From Molecular Simulations to Error Correction. Open Science Articles (OSAs), Zenodo. https://doi.org/10.5281/zenodo.19793852
+
+Keçeci, M. (2026). Kuantum Hesaplamada Uzay Dolduran Eğriler: Moleküler Simülasyonlardan Hata Düzeltmeye. Open Science Articles (OSAs), Zenodo. https://doi.org/10.5281/zenodo.19666944
+
 Keçeci, M. (2026). kececicurve. Open Science Articles (OSAs), Zenodo. https://doi.org/10.5281/zenodo.19696338
+
+Keçeci, M. (2026). spacecurves. Open Science Articles (OSAs), Zenodo. https://doi.org/10.5281/zenodo.19672791
 
