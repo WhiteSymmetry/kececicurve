@@ -7460,7 +7460,7 @@ def show_menu():
         print("   0. Exit / Çıkış")
         print("="*70)
 
-        choice = input("Seçiminiz (0-60): ").strip()
+        choice = input("Seçiminiz (1-61): ").strip()
 
         if choice == '0':
             print("Programdan çıkılıyor... / Exiting...")
