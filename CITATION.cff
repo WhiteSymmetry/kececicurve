@@ -17,6 +17,10 @@ authors:
 identifiers:
   - type: doi
     value: 10.5281/zenodo.19696338
+  - type: doi
+    value: 10.5281/zenodo.19796065
+  - type: doi
+    value: 10.5281/zenodo.19885259
 repository-code: 'https://github.com/WhiteSymmetry/kececicurve'
 url: 'https://github.com/WhiteSymmetry/kececicurve'
 repository: 'https://anaconda.org/bilgi/kececicurve'
@@ -28,5 +32,5 @@ keywords:
   - curves
 license: AGPL-3.0-or-later
 commit: 'Revision: 1'
-version: 0.1.4
+version: 0.1.5
 date-released: '2026-04-22'
