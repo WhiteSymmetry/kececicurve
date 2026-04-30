@@ -2,3 +2,5 @@
 numpy
 matplotlib
 scipy
+chess
+kha256
