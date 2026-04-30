@@ -30,7 +30,30 @@ Keçeci Curve - Parametrik Uzay Doldurma Eğrisi Ailesi
 Tamamen özgün, çok amaçlı ve esnek bir fraktal eğri üreteci
 """
 
+import colorsys
+from enum import Enum
+from functools import lru_cache
+from kha256 import (
+    KHA256,
+    kha_rastgele_sayi,
+    rastgele_sayi,
+    kha256_hard_random,
+    kha256_memory_hard_random,
+    kha256_password_random,
+    kha256_fortified_random,
+    true_memory_hard_random,
+    memory_hard_hash_random,
+    memory_hard_engine_random,
+    fortified_kha_random,
+    kha256b_random,
+    scrypt_random,
+    gscrypt_random,
+    bscrypt_random,
+    scrypt_dual_output,
+    hash_password
+)
 import numpy as np
+import math
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.colors import LinearSegmentedColormap
@@ -40,14 +63,17 @@ from matplotlib.patches import Circle, Rectangle, FancyBboxPatch
 from matplotlib.patches import ConnectionPatch
 from matplotlib import patches
 import matplotlib.patches as mpatches
-import colorsys
-from enum import Enum
+import os
+from PIL import Image
+import random
 from scipy.spatial import KDTree
 from scipy.spatial.distance import pdist
 from scipy.stats import spearmanr, linregress
-from typing import List, Tuple, Callable, Optional, Union
+import time
+from typing import Any, Callable, List, Optional, Tuple, Union
 import warnings
 warnings.filterwarnings('ignore')
+
 
 # Matplotlib yapılandırması - OverflowError çözümü
 mpl.rcParams['agg.path.chunksize'] = 20000
@@ -6436,6 +6462,450 @@ def peano_test(order: int = 3):
         print("ℹ️ Dağılım biraz değişken")
     print(f"{'='*60}\n")
 
+# ------------------------------------------------------------
+# YARDIMCI: GÜVENLİ KEÇECİ NOKTA ÜRETİCİ (mevcut sınıf sorunluysa)
+# ------------------------------------------------------------
+_curve_cache = {}
+
+def _safe_kececi_points(
+    num_children: int = 4,
+    max_level: int = 7,
+    scale_factor: float = 0.45,
+    base_radius: float = 1.8,
+    angle_offset: float = 0.0,
+    angle_variation: float = 0.0,
+    growth_mode: str = 'outward',
+    ordering_mode: str = 'sequential'
+) -> List[Tuple[float, float]]:
+    """Bağımsız, hatasız Keçeci nokta üretici (fallback)."""
+    key = (num_children, max_level, scale_factor, base_radius,
+           angle_offset, angle_variation, growth_mode, ordering_mode)
+    if key in _curve_cache:
+        return _curve_cache[key]
+    points = []
+    def _gen(cx, cy, radius, level, angle):
+        if level > max_level:
+            points.append((cx, cy))
+            return
+        points.append((cx, cy))
+        child_r = radius * scale_factor
+        children = []
+        step = 2 * math.pi / num_children
+        for i in range(num_children):
+            child_angle = step * i + angle_offset + angle_variation * level
+            if growth_mode == 'inward':
+                dist = radius - child_r
+            elif growth_mode == 'tangent':
+                dist = radius
+            elif growth_mode == 'overlapping':
+                dist = radius * (1 - scale_factor * 0.5)
+            else:
+                dist = radius + child_r
+            x = cx + dist * math.cos(child_angle)
+            y = cy + dist * math.sin(child_angle)
+            children.append((x, y, child_angle))
+        if ordering_mode == 'alternating':
+            children = children[0::2] + children[1::2]
+        elif ordering_mode == 'spiral':
+            children.sort(key=lambda c: c[2])
+        elif ordering_mode == 'reverse_spiral':
+            children.sort(key=lambda c: c[2], reverse=True)
+        for x, y, _ in children:
+            _gen(x, y, child_r, level + 1, child_angle)
+    _gen(0.0, 0.0, base_radius, 0, 0.0)
+    _curve_cache[key] = points
+    return points
+
+# ------------------------------------------------------------
+# 1. PERMÜTASYON ÜRETİCİ (önbellekli, birebir)
+# ------------------------------------------------------------
+@lru_cache(maxsize=32)
+def get_permutation(h: int, w: int, curve_params: tuple) -> np.ndarray:
+    """
+    curve_params = (num_children, max_level, growth_mode, scale_factor, base_radius)
+    Dönen: 0..(h*w-1) tam permütasyon (numpy array)
+    """
+    (num_children, max_level, growth_mode, scale_factor, base_radius) = curve_params
+    try:
+        from kececicurve import KececiCurve
+        curve = KececiCurve(
+            num_children=num_children,
+            max_level=max_level,
+            growth_mode=growth_mode,
+            scale_factor=scale_factor,
+            base_radius=base_radius
+        )
+        points = curve.generate()
+    except:
+        points = _safe_kececi_points(
+            num_children=num_children,
+            max_level=max_level,
+            growth_mode=growth_mode,
+            scale_factor=scale_factor,
+            base_radius=base_radius
+        )
+    total = h * w
+    n_pts = len(points)
+    t = np.linspace(0, 1, n_pts)
+    x_vals = np.array([p[0] for p in points])
+    y_vals = np.array([p[1] for p in points])
+    t_new = np.linspace(0, 1, total)
+    x_interp = np.interp(t_new, t, x_vals)
+    y_interp = np.interp(t_new, t, y_vals)
+    xi = (x_interp * w).astype(np.int32) % w
+    yi = (y_interp * h).astype(np.int32) % h
+    indices = yi * w + xi
+
+    # Tekrarları düzelt (birebir permütasyon)
+    sort_idx = np.argsort(indices)
+    sorted_vals = indices[sort_idx]
+    uniq, first_occ, counts = np.unique(sorted_vals, return_index=True, return_counts=True)
+    dup_positions = []
+    for i, cnt in enumerate(counts):
+        if cnt > 1:
+            start = first_occ[i]
+            dup_positions.extend(sort_idx[start+1 : start+cnt])
+    if dup_positions:
+        present = set(indices)
+        missing = sorted(set(range(total)) - present)
+        perm = indices.copy()
+        for pos, miss in zip(dup_positions, missing):
+            perm[pos] = miss
+        return perm
+    return indices
+
+# ------------------------------------------------------------
+# 2. GÖRÜNTÜ ŞİFRELEME / DEŞİFRELEME
+# ------------------------------------------------------------
+def encrypt_image(image: np.ndarray, curve_params: tuple) -> Tuple[np.ndarray, np.ndarray]:
+    """Görüntüyü Keçeci permütasyonu ile karıştırır. Döner: (şifreli_görüntü, permütasyon)"""
+    h, w, c = image.shape
+    perm = get_permutation(h, w, curve_params)
+    flat = image.reshape(-1, c)
+    encrypted_flat = flat[perm].copy()
+    encrypted = encrypted_flat.reshape(h, w, c).astype(np.uint8)
+    return encrypted, perm
+
+def decrypt_image(encrypted: np.ndarray, perm: np.ndarray) -> np.ndarray:
+    """Ters permütasyon uygulayarak orijinal görüntüyü geri getirir."""
+    h, w, c = encrypted.shape
+    inv_perm = np.argsort(perm)
+    flat = encrypted.reshape(-1, c)
+    decrypted_flat = flat[inv_perm]
+    return decrypted_flat.reshape(h, w, c).astype(np.uint8)
+
+# ------------------------------------------------------------
+# 3. GÖRÜNTÜ İMZALAMA (KHA-256 ile bütünlük kontrolü)
+# ------------------------------------------------------------
+def compute_image_signature(image_path: str, secret_key: bytes, curve_params: tuple = (4,7,'inward',0.45,1.8)) -> str:
+    img = Image.open(image_path).convert('RGB')
+    original = np.array(img, dtype=np.uint8)
+    h, w, _ = original.shape
+    perm = get_permutation(h, w, curve_params)
+    flat = original.reshape(-1, 3)
+    encrypted_flat = flat[perm]
+    kha = KHA256()
+    return kha.hash(encrypted_flat.tobytes(), salt=secret_key, deterministic=False)
+
+def verify_image_signature(image_path: str, expected_hash: str, secret_key: bytes, curve_params: tuple = (4,7,'inward',0.45,1.8)) -> bool:
+    return compute_image_signature(image_path, secret_key, curve_params) == expected_hash
+
+# ------------------------------------------------------------
+# 4. KEÇECİ ÖRNEKLEME RASTGELE SAYI ÜRETECİ (SamplingRNG)
+# ------------------------------------------------------------
+class KececiSamplingRNG:
+    """
+    Keçeci Eğrisi tabanlı ÖRNEKLEME RASTGELE SAYI ÜRETECİ.
+    - Eğri noktalarından oluşturulan havuzu KHA-256'nın güçlü rastgele fonksiyonlarıyla harmanlar.
+    - Her çağrıda farklı tohum kullanarak yüksek entropi sağlar.
+    - 'örneklem' terimi, belirtilen aralıktan eşit olasılıklı seçim yapıldığını vurgular.
+    """
+    def __init__(self, seed: Optional[int] = None, curve_params: Tuple = (4,5,'inward',0.45,1.8)):
+        if seed is None:
+            seed = kha_rastgele_sayi(0, 2**32-1)
+        self.seed = seed
+        np.random.seed(seed)
+        self.curve_params = curve_params
+        self._init_sequence()
+    
+    def _init_sequence(self):
+        try:
+            from kececicurve import KececiCurve
+            curve = KececiCurve(
+                num_children=self.curve_params[0],
+                max_level=self.curve_params[1],
+                growth_mode=self.curve_params[2],
+                scale_factor=self.curve_params[3],
+                base_radius=self.curve_params[4]
+            )
+            points = curve.generate()
+        except:
+            points = _safe_kececi_points(
+                num_children=self.curve_params[0],
+                max_level=self.curve_params[1],
+                growth_mode=self.curve_params[2],
+                scale_factor=self.curve_params[3],
+                base_radius=self.curve_params[4]
+            )
+        self.points = points[:10000]
+        self.sequence = []
+        hasher = KHA256()
+        for x, y in self.points:
+            h = hasher.hash(f"{x}{y}{self.seed}".encode(), salt=None, deterministic=False)
+            val = int(h, 16) & 0xFFFFFFFF
+            self.sequence.append(val)
+        self.index = 0
+    
+    def random(self) -> float:
+        if self.index >= len(self.sequence):
+            self.index = 0
+        v = self.sequence[self.index]
+        self.index += 1
+        return v / 0xFFFFFFFF
+    
+    def randint(self, low: int, high: int) -> int:
+        return low + int(self.random() * (high - low + 1))
+    
+    def choice(self, seq):
+        return seq[self.randint(0, len(seq)-1)]
+    
+    def shuffle(self, seq):
+        for i in range(len(seq)-1, 0, -1):
+            j = self.randint(0, i)
+            seq[i], seq[j] = seq[j], seq[i]
+    
+    # Aşağıdaki statik metodlar KHA-256'nın hazır rastgele fonksiyonlarını doğrudan kullanır
+    @staticmethod
+    def system_random(low: int, high: int) -> int:
+        return kha_rastgele_sayi(low, high)
+    
+    @staticmethod
+    def hardware_random(low: int, high: int) -> int:
+        return kha256_hard_random(low, high)
+    
+    @staticmethod
+    def memory_hard_random(low: int, high: int) -> int:
+        return kha256_memory_hard_random(low, high)
+    
+    @staticmethod
+    def fortified_random(low: int, high: int) -> int:
+        return kha256_fortified_random(low, high)
+
+# ==================== YENİ KRİPTO FONKSİYONLARI (DEMOLAR) ====================
+def demo_encrypt_decrypt():
+    """54. Görüntü şifreleme/deşifreleme demosu"""
+    import os
+    from PIL import Image
+    print("\n🔐 Görüntü Şifreleme/Deşifreleme Demo")
+    img_path = input("Şifrelenecek görüntü dosyası (varsayılan: input.jpg): ").strip()
+    if not img_path:
+        img_path = "input.jpg"
+    if not os.path.exists(img_path):
+        print("Dosya bulunamadı, rastgele görüntü oluşturuluyor...")
+        test_img = np.random.randint(0, 256, (300, 300, 3), dtype=np.uint8)
+        Image.fromarray(test_img).save("temp_demo.png")
+        img_path = "temp_demo.png"
+    
+    img = Image.open(img_path).convert('RGB')
+    original = np.array(img)
+    params = (4, 7, 'inward', 0.45, 1.8)  # anahtar
+    encrypted, perm = encrypt_image(original, params)
+    decrypted = decrypt_image(encrypted, perm)
+    
+    if np.array_equal(original, decrypted):
+        print("✅ Şifreleme ve deşifreleme başarılı!")
+    else:
+        print("❌ Hata!")
+    
+    # Görselleştir
+    import matplotlib.pyplot as plt
+    plt.figure(figsize=(12,4))
+    plt.subplot(131); plt.imshow(original); plt.title("Orijinal")
+    plt.subplot(132); plt.imshow(encrypted); plt.title("Şifrelenmiş")
+    plt.subplot(133); plt.imshow(decrypted); plt.title("Deşifrelenmiş")
+    plt.show()
+
+def demo_signature():
+    """55. Görüntü imzalama ve doğrulama demosu"""
+    import os
+    from PIL import Image
+    print("\n📝 Görüntü İmzalama ve Doğrulama Demo")
+    img_path = input("Görüntü dosyası (varsayılan: input.jpg): ").strip()
+    if not img_path:
+        img_path = "input.jpg"
+    if not os.path.exists(img_path):
+        print("Dosya bulunamadı, rastgele görüntü oluşturuluyor...")
+        test_img = np.random.randint(0, 256, (200, 200, 3), dtype=np.uint8)
+        Image.fromarray(test_img).save("temp_sig.png")
+        img_path = "temp_sig.png"
+    
+    secret = b"benim_gizli_anahtarim"
+    sig = compute_image_signature(img_path, secret)
+    print(f"İmza (KHA-256): {sig[:32]}...")
+    
+    valid = verify_image_signature(img_path, sig, secret)
+    print(f"Doğrulama: {'Başarılı' if valid else 'Başarısız'}")
+    
+    # Bozulmuş test
+    img = Image.open(img_path)
+    arr = np.array(img)
+    if arr.size > 0:
+        arr[0,0,0] = (int(arr[0,0,0]) + 1) % 256
+        Image.fromarray(arr).save("temp_tampered.png")
+        valid2 = verify_image_signature("temp_tampered.png", sig, secret)
+        print(f"Bozulmuş görüntü doğrulaması: {'Başarılı' if valid2 else 'Başarısız'} (beklenen: Başarısız)")
+    os.system("rm -f temp_tampered.png temp_sig.png 2>/dev/null")
+
+def demo_sampling_rng():
+    """56. Keçeci Örnekleme RNG demosu"""
+    print("\n🔀 Keçeci Örnekleme RNG Demo")
+    rng = KececiSamplingRNG(seed=42)
+    print("İlk 10 rastgele sayı (1-100 arası):")
+    for _ in range(10):
+        print(rng.randint(1, 100), end=" ")
+    print("\n\nKHA-256 donanım rastgele örnekleri (hardware_random olduğu için biraz yavaş üretir):")
+    for _ in range(5):
+        print(KececiSamplingRNG.hardware_random(1, 100), end=" ")
+    print()
+
+def demo_key_derivation():
+    """57. Görüntüden anahtar türetme (KDF benzeri)"""
+    import os
+    from PIL import Image
+    print("\n🔑 Görüntüden Anahtar Türetme Demo")
+    img_path = input("Görüntü dosyası (varsayılan: input.jpg): ").strip()
+    if not img_path:
+        img_path = "input.jpg"
+    if not os.path.exists(img_path):
+        print("Dosya yok, rastgele oluşturuluyor...")
+        test_img = np.random.randint(0, 256, (100,100,3), dtype=np.uint8)
+        Image.fromarray(test_img).save("temp_kdf.png")
+        img_path = "temp_kdf.png"
+    
+    secret_key = b"diger_gizli_anahtar"
+    derived = compute_image_signature(img_path, secret_key)
+    print(f"Türetilmiş anahtar (ilk 32 karakter): {derived[:32]}...")
+    print("NOT: Aynı görüntü + aynı gizli anahtar aynı sonucu verir.")
+    os.system("rm -f temp_kdf.png 2>/dev/null")
+
+def demo_batch_encrypt():
+    """58. Toplu görüntü işleme (klasördeki tüm resimleri şifrele)"""
+    import os, glob
+    print("\n📁 Toplu Görüntü Şifreleme")
+    folder = input("Klasör yolu (varsayılan: ./ ): ").strip()
+    if not folder:
+        folder = "."
+    extensions = ['.jpg', '.jpeg', '.png', '.bmp', '.tiff']
+    images = []
+    for ext in extensions:
+        images.extend(glob.glob(os.path.join(folder, f"*{ext}")))
+        images.extend(glob.glob(os.path.join(folder, f"*{ext.upper()}")))
+    print(f"Bulunan {len(images)} görüntü dosyası.")
+    if not images:
+        print("Hiçbir resim bulunamadı.")
+        return
+    params = (4, 7, 'inward', 0.45, 1.8)
+    from PIL import Image
+    for img_path in images[:5]:  # ilk 5 örnek
+        try:
+            img = Image.open(img_path).convert('RGB')
+            original = np.array(img)
+            encrypted, perm = encrypt_image(original, params)
+            out_path = img_path.rsplit('.', 1)[0] + "_encrypted.png"
+            Image.fromarray(encrypted).save(out_path)
+            print(f"Şifrelendi: {img_path} -> {out_path}")
+        except Exception as e:
+            print(f"Hata {img_path}: {e}")
+    print("İşlem tamamlandı (ilk 5 dosya).")
+
+def demo_params_as_key():
+    """59. Permütasyon parametrelerini anahtar olarak kullanma"""
+    print("\n🔑 Permütasyon Parametreleri (curve_params) Anahtar Olarak")
+    print("Farklı parametreler farklı permütasyonlar üretir.")
+    params1 = (4, 5, 'inward', 0.45, 1.8)
+    params2 = (5, 5, 'outward', 0.5, 2.0)
+    test_img = np.random.randint(0, 256, (100,100,3), dtype=np.uint8)
+    enc1, _ = encrypt_image(test_img, params1)
+    enc2, _ = encrypt_image(test_img, params2)
+    diff = np.sum(np.abs(enc1.astype(np.int16) - enc2.astype(np.int16)))
+    print(f"İki farklı anahtar (parametre seti) ile şifrelenmiş görüntüler arasındaki fark: {diff} piksel (0'dan büyük olmalı, yani farklılar).")
+    print("Anahtar = (num_children, max_level, growth_mode, scale_factor, base_radius)")
+
+def oyun_kaplumbaga_tavsan():
+    """
+    Kaplumbağa Ninja vs Beyaz Tavşan oyunu.
+    - Hızlı rastgele sayı üreteci: random.randint(1,9)
+    - 5 tur üzerinden oynanır.
+    - Oyun iptal edilene kadar (yani program kapanana veya menüye dönülene kadar) skorlar bellekte tutulur.
+    """
+    # Global oyun geçmişi (bu fonksiyona eklenen bir nitelik)
+    if not hasattr(oyun_kaplumbaga_tavsan, "sonuclar"):
+        oyun_kaplumbaga_tavsan.sonuclar = []
+    
+    oyuncular = {
+        1: {"isim": "Kaplumbağa Ninja", "puan": 0, "kazandigi_turlar": []},
+        2: {"isim": "Beyaz Tavşan", "puan": 0, "kazandigi_turlar": []}
+    }
+    tur_sayisi = 5
+    
+    print("\n" + "="*50)
+    print("🐢 Kaplumbağa NINJA vs 🐇 BEYAZ TAVŞAN (HIZLI OYUN)")
+    print("1-9 arasında rastgele sayıyı bilen turu kazanır!")
+    print(f"Toplam {tur_sayisi} tur oynanacak. Hızlı random kullanılır.\n")
+    
+    for tur in range(1, tur_sayisi+1):
+        print(f"--- {tur}. TUR ---")
+        sayi = random.randint(1, 9)   # hızlı üreteç
+        
+        # Tahminler
+        tahmin1 = int(input(f"{oyuncular[1]['isim']}, tahminin (1-9): "))
+        tahmin2 = int(input(f"{oyuncular[2]['isim']}, tahminin (1-9): "))
+        
+        print(f"🔀 Rastgele sayı: {sayi}")
+        if tahmin1 == sayi and tahmin2 == sayi:
+            print("✨ Beraberlik! Puan yok.")
+        elif tahmin1 == sayi:
+            print("🎉 Kaplumbağa Ninja turu kazandı! +1 puan")
+            oyuncular[1]["puan"] += 1
+            oyuncular[1]["kazandigi_turlar"].append(tur)
+        elif tahmin2 == sayi:
+            print("🥕 Beyaz Tavşan turu kazandı! +1 puan")
+            oyuncular[2]["puan"] += 1
+            oyuncular[2]["kazandigi_turlar"].append(tur)
+        else:
+            print("❌ Hiçbiri bilemedi.")
+        
+        print(f"Skor: {oyuncular[1]['puan']} - {oyuncular[2]['puan']}\n")
+    
+    # Oyun sonucu
+    p1, p2 = oyuncular[1]["puan"], oyuncular[2]["puan"]
+    if p1 > p2:
+        kazanan = oyuncular[1]["isim"]
+        kaybeden = oyuncular[2]["isim"]
+        print(f"🏆 KAZANAN: {kazanan} ({p1} - {p2})")
+    elif p2 > p1:
+        kazanan = oyuncular[2]["isim"]
+        kaybeden = oyuncular[1]["isim"]
+        print(f"🏆 KAZANAN: {kazanan} ({p2} - {p1})")
+    else:
+        kazanan = "Beraberlik"
+        kaybeden = "Beraberlik"
+        print("🤝 BERABERLİK!")
+    
+    # Geçmişe kaydet
+    oyun_kaplumbaga_tavsan.sonuclar.append({
+        "kazanan": kazanan,
+        "kaybeden": kaybeden,
+        "skor": f"{p1}-{p2}",
+        "tarih": __import__('time').strftime("%Y-%m-%d %H:%M:%S")
+    })
+    
+    print("\n📜 Bu oturumdaki oyun sonuçları:")
+    for i, res in enumerate(oyun_kaplumbaga_tavsan.sonuclar[-5:], 1):
+        print(f"  {i}. {res['kazanan']} kazandı, {res['kaybeden']} kaybetti (Skor: {res['skor']})")
+    
+    input("\nMenüye dönmek için Enter'a basın...")
+
 def show_menu():
     """Kullanıcı menüsü – İngilizce + Türkçe, konularına göre gruplandırılmış"""
     menu_options = {
@@ -6539,6 +7009,14 @@ def show_menu():
                lambda: CurveComparisonVisualizer().generate_radar_comparison()),
         '53': ('Locality Heatmap – Both Normalizations / Lokalite Isı Haritası – İki Normalizasyon',
                locality_heatmap_both_versions),
+        # KRİPTO MADDELERİ (54-59)
+        '54': ('Görüntü Şifreleme/Deşifreleme (Encrypt/Decrypt)', demo_encrypt_decrypt),
+        '55': ('Görüntü İmzalama ve Doğrulama (Signature & Verify)', demo_signature),
+        '56': ('Keçeci Örnekleme RNG (Sampling RNG)', demo_sampling_rng),
+        '57': ('Görüntüden Anahtar Türetme (Key Derivation)', demo_key_derivation),
+        '58': ('Toplu Görüntü Şifreleme (Batch Encrypt)', demo_batch_encrypt),
+        '59': ('Permütasyon Parametrelerini Anahtar Olarak Kullanma', demo_params_as_key),
+        '60': ('🐢 Kaplumbağa Ninja vs 🐇 Beyaz Tavşan Oyunu (Rastgele Sayı Tahmin)', oyun_kaplumbaga_tavsan),
     }
 
     # Grup başlıkları
@@ -6550,6 +7028,8 @@ def show_menu():
         ("KEÇECİ PARAMETRE ETKİLERİ / KEÇECİ PARAMETER EFFECTS", range(37, 42)),
         ("SİERPİNSKİ & PEANO ÖZEL / SIERPINSKI & PEANO SPECIALS", range(42, 49)),
         ("EK KARŞILAŞTIRMA VE ANALİZLER / ADDITIONAL COMPARISONS & ANALYSES", range(49, 54)),
+        ("KRİPTOGRAFİ / CRYPTOGRAPHY", range(54, 60)),   # 54-59 arası
+        ("🎮 OYUN / GAME", range(60, 61)),
     ]
 
     while True:
@@ -6570,7 +7050,7 @@ def show_menu():
         print("   0. Exit / Çıkış")
         print("="*70)
 
-        choice = input("Seçiminiz (0-53): ").strip()
+        choice = input("Seçiminiz (0-59): ").strip()
 
         if choice == '0':
             print("Programdan çıkılıyor... / Exiting...")
