@@ -256,27 +256,28 @@ Bu interaktif menü, **çiçek desenlerinden kuantum algoritmalarına** kadar 30
   49. Curve Process by Level / Eğrilerin Seviyeye Göre Gelişimi
   50. Locality / Lokalite
   51. Keçeci Parametric Variations / Keçeci Parametrik Varyasyonları
-  52. Detailed Radar Comparison / Detaylı Radar Karşılaştırması
-  53. Locality Heatmap – Both Normalizations / Lokalite Isı Haritası – İki Normalizasyon
+  52. Keçeci Parametric Variations / Keçeci Parametrik Varyasyonları (inherit_parent_angle=True)
+  53. Detailed Radar Comparison / Detaylı Radar Karşılaştırması
+  54. Locality Heatmap – Both Normalizations / Lokalite Isı Haritası – İki Normalizasyon
 
   KRİPTOGRAFİ / CRYPTOGRAPHY
   --------------------------------------------------------------------
-  54. Görüntü Şifreleme/Deşifreleme (Encrypt/Decrypt)
   55. Görüntü İmzalama ve Doğrulama (Signature & Verify)
   56. Keçeci Örnekleme RNG (Sampling RNG)
   57. Görüntüden Anahtar Türetme (Key Derivation)
   58. Toplu Görüntü Şifreleme (Batch Encrypt)
   59. Permütasyon Parametrelerini Anahtar Olarak Kullanma
+  60. Görüntü Şifreleme/Deşifreleme (Encrypt/Decrypt)
 
   🎮 OYUN / GAME
   --------------------------------------------------------------------
-  60. 🐢 Kaplumbağa Ninja vs 🐇 Beyaz Tavşan Oyunu (Rastgele Sayı Tahmin)
+  61. 🐢 Kaplumbağa Ninja vs 🐇 Beyaz Tavşan Oyunu (Rastgele Sayı Tahmin)
 
   --------------------------------------------------------------------
    0. Exit / Çıkış
 ======================================================================
 
-Seçiminiz (0-53):
+Seçiminiz (1-61):
 
 
 ---
