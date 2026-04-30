@@ -3,7 +3,7 @@ kececicurve - Parametric Space-Filling Curve Family
 Keçeci Eğrisi: Tamamen özgün, çok amaçlı ve esnek bir fraktal eğri üreteci.
 """
 
-__version__ = "0.1.4"
+__version__ = "0.1.5"
 __author__ = "Mehmet Keçeci"
 
 from .kececicurve import (
@@ -69,6 +69,22 @@ from .kececicurve import (
     
     # Galeri
     generate_kececi_curve_gallery,
+
+    #kripto
+    demo_params_as_key,
+    demo_batch_encrypt,
+    demo_key_derivation,
+    demo_sampling_rng,
+    demo_signature,
+    demo_encrypt_decrypt,
+    KececiSamplingRNG,
+    verify_image_signature,
+    compute_image_signature,
+    decrypt_image,
+    encrypt_image,
+    get_permutation,
+    _safe_kececi_points,
+    oyun_kaplumbaga_tavsan,
     
     # Menü
     show_menu,
@@ -121,4 +137,18 @@ __all__ = [
     "plot_sierpinski_triangle",
     "COMPARISON_DATA",
     "show_menu",
+    "demo_params_as_key",
+    "demo_batch_encrypt",
+    "demo_key_derivation",
+    "demo_sampling_rng",
+    "demo_signature",
+    "demo_encrypt_decrypt",
+    "KececiSamplingRNG",
+    "verify_image_signature",
+    "compute_image_signature",
+    "decrypt_image",
+    "encrypt_image",
+    "get_permutation",
+    "_safe_kececi_points",
+    "oyun_kaplumbaga_tavsan",
 ]
