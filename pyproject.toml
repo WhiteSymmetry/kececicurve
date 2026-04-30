@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kececicurve"
-version = "0.1.4"
+version = "0.1.5"
 dynamic = ["keywords", "maintainers"]
 license = "GPL-3.0-or-later"  # SPDX ID
 
@@ -26,7 +26,7 @@ classifiers = [
 dependencies = ["numpy", "matplotlib"]
 
 [project.optional-dependencies]
-test = ["pytest", "pytest-cov", "pytest-mock", "ruff", "numpy", "matplotlib", "scipy"]
+test = ["pytest", "pytest-cov", "pytest-mock", "ruff", "numpy", "matplotlib", "scipy", "chess", "kha256"]
 
 [tool.setuptools.packages.find]
 where = ["."]
