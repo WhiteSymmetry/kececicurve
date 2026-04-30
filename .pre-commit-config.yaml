@@ -12,7 +12,7 @@ repos:
         exclude: "^(kececicurve/_version.py)$"
 
 -   repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.5
+    rev: v0.15.12
     hooks:
       - id: ruff
         args: [--fix, --show-fixes]
