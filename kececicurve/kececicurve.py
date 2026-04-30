@@ -33,6 +33,7 @@ Tamamen özgün, çok amaçlı ve esnek bir fraktal eğri üreteci
 import colorsys
 from enum import Enum
 from functools import lru_cache
+import hashlib
 from kha256 import (
     KHA256,
     kha_rastgele_sayi,
@@ -54,19 +55,18 @@ from kha256 import (
 )
 import numpy as np
 import math
-import matplotlib.pyplot as plt
 import matplotlib as mpl
-from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.colors import LinearSegmentedColormap, LogNorm
 #from mpl_toolkits.mplot3d import Axes3D
 import mpl_toolkits.mplot3d
-from matplotlib.patches import Circle, Rectangle, FancyBboxPatch
-from matplotlib.patches import ConnectionPatch
+from matplotlib.patches import Circle, ConnectionPatch, Rectangle, FancyBboxPatch
 from matplotlib import patches
 import matplotlib.patches as mpatches
+import matplotlib.pyplot as plt
 import os
 from PIL import Image
 import random
-from scipy.spatial import KDTree
+from scipy.spatial import cKDTree, KDTree
 from scipy.spatial.distance import pdist
 from scipy.stats import spearmanr, linregress
 import time
