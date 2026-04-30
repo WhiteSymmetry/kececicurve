@@ -425,7 +425,7 @@ class CurveComparisonVisualizer:
                     color='white', fontsize=16, fontweight='bold', y=0.99)
         plt.tight_layout()
         plt.show()
-        return fig
+        #return fig
     
     def generate_comprehensive_comparison(self):
         fig = plt.figure(figsize=(24, 14))
@@ -472,7 +472,7 @@ class CurveComparisonVisualizer:
                     color='white', fontsize=18, fontweight='bold', y=0.98)
         plt.tight_layout()
         plt.show()
-        return fig
+        #return fig
     
     def _get_curve_points(self, curve_name: str, level: int) -> List:
         if curve_name == 'Keçeci':
@@ -640,7 +640,7 @@ class CurveComparisonVisualizer:
         plt.tight_layout()
         plt.show()
         
-        return fig
+        #return fig
     
     def generate_locality_comparison(self):
         """Bağlantılılık karşılaştırması: Eğrilerin lokalite özellikleri"""
@@ -711,7 +711,7 @@ class CurveComparisonVisualizer:
         )
         plt.tight_layout()
         plt.show()
-        return fig
+        #return fig
     
     def generate_kececi_variations(self):
         """Keçeci Curve/Eğrisi'nin parametrik varyasyonları"""
@@ -771,7 +771,68 @@ class CurveComparisonVisualizer:
         plt.tight_layout()
         plt.show()
         
-        return fig
+        #return fig # çıktıyı 2 kere çıkartmasına sebep oluyor.
+
+    def generate_kececi_variations2(self):
+        """Keçeci Curve/Eğrisi'nin parametrik varyasyonları"""
+        fig, axes = plt.subplots(2, 4, figsize=(20, 12))
+        fig.patch.set_facecolor('#0a0a1a')
+        
+        variations = [
+            (4, 3, 'outward', 'sequential', '4-Çocuk\nDışa Büyüme'),
+            (6, 3, 'outward', 'sequential', '6-Çocuk\nDışa Büyüme'),
+            (8, 3, 'outward', 'sequential', '8-Çocuk\nDışa Büyüme'),
+            (6, 3, 'inward', 'sequential', '6-Çocuk\nİçe Büyüme'),
+            (6, 3, 'outward', 'alternating', '6-Çocuk\nAlternatif Sıralama'),
+            (6, 3, 'outward', 'spiral', '6-Çocuk\nSpiral Sıralama'),
+            (8, 2, 'outward', 'spiral', '8-Çocuk Seviye 2\nSpiral'),
+            (10, 2, 'outward', 'alternating', '10-Çocuk Seviye 2\nAlternatif'),
+        ]
+        
+        for idx, (nc, ml, gm, om, title) in enumerate(variations):
+            ax = axes[idx // 4, idx % 4]
+            ax.set_facecolor('#0a0a1a')
+            
+            curve = KececiCurve(
+                num_children=nc,
+                max_level=ml,
+                growth_mode=gm,
+                ordering_mode=om,
+                base_radius=1.5,
+                scale_factor=0.4,
+                inherit_parent_angle=True,
+            )
+            points = curve.generate()
+            
+            if len(points) > 1:
+                xs = [p[0] for p in points]
+                ys = [p[1] for p in points]
+                
+                for i in range(len(xs) - 1):
+                    hue = i / len(xs)
+                    color = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
+                    ax.plot(xs[i:i+2], ys[i:i+2], '-', color=color, linewidth=2, alpha=0.9)
+                
+                ax.scatter(xs[0], ys[0], color='white', s=80, marker='o', zorder=5)
+                ax.scatter(xs[-1], ys[-1], color='yellow', s=80, marker='s', zorder=5)
+            
+            ax.set_title(f"Keçeci: {title}", color='white', fontsize=10)
+            ax.set_aspect('equal')
+            ax.set_xticks([])
+            ax.set_yticks([])
+            
+            for spine in ax.spines.values():
+                spine.set_color('#333366')
+                spine.set_linewidth(0.5)
+        
+        plt.suptitle("Keçeci Curve/Eğrisi'nin Keçeci Parametric Variations / Parametrik Varyasyonları\n"
+                    "Çocuk sayısı, büyüme yönü, sıralama stratejisi ve seviye değişimleri", 
+                    color='white', fontsize=16, fontweight='bold', y=0.99)
+        
+        plt.tight_layout()
+        plt.show()
+        
+        #return fig
     
     def generate_radar_comparison(self):
         """Radar grafiği ile özellik karşılaştırması (güncel)"""
@@ -856,7 +917,7 @@ class CurveComparisonVisualizer:
                      color='white', fontsize=16, fontweight='bold', y=1.02)
         plt.tight_layout()
         plt.show()
-        return fig
+        #return fig
 
     def _draw_locality_info(self, ax):
         """Lokalite bilgi paneli"""
@@ -891,15 +952,361 @@ class CurveComparisonVisualizer:
 # ============================================================================
 # OPTİMİZE KEÇECİ EĞRİSİ - ÖNBELLEK DESTEKLİ
 # ============================================================================
-
 class KececiCurve:
-    """Optimize Keçeci Curve/Eğrisi - Sonuçları önbelleğe alır"""
+    # inherit_parent_angle=False   # klasik (bağımsız)
+    # inherit_parent_angle=True    # spiral (bağımlı)
+
+    _cache = {}
+
+    def __init__(
+        self,
+        num_children: int = 4,
+        max_level: int = 4,
+        scale_factor: float = 0.45,
+        base_radius: float = 1.8,
+        angle_offset: float = 0.0,
+        angle_variation: float = 0.0,
+        growth_mode: str = 'outward',
+        ordering_mode: str = 'sequential',
+        inherit_parent_angle: bool = False,
+    ):
+        self.num_children = num_children
+        self.max_level = max_level
+        self.scale_factor = float(scale_factor)
+        self.base_radius = float(base_radius)
+        self.angle_offset = angle_offset
+        self.angle_variation = angle_variation
+        self.growth_mode = growth_mode
+        self.ordering_mode = ordering_mode
+        self.inherit_parent_angle = inherit_parent_angle
+        self.points = []
+        self._cache_key = (num_children, max_level, scale_factor, base_radius,
+                          angle_offset, angle_variation, growth_mode, ordering_mode,
+                          inherit_parent_angle)
+
+    def generate(self) -> List[Tuple[float, float]]:
+        if self._cache_key in self._cache:
+            return self._cache[self._cache_key]
+        self.points = []
+        self._generate_recursive((0.0, 0.0), self.base_radius, 0, 0.0)
+        self._cache[self._cache_key] = self.points
+        if len(self._cache) > 50:
+            for key in list(self._cache.keys())[:10]:
+                del self._cache[key]
+        return self.points
+
+    def _generate_recursive(self, center, radius, level, parent_angle):
+        radius = float(radius)
+        if level > self.max_level:
+            self.points.append(center)
+            return
+        self.points.append(center)
+        child_radius = radius * self.scale_factor
+        children = []
+
+        for i in range(self.num_children):
+            base_angle = 2 * np.pi * i / self.num_children
+            level_angle = self.angle_variation * level
+
+            if self.inherit_parent_angle:
+                child_angle = parent_angle + base_angle + self.angle_offset + level_angle
+            else:
+                child_angle = base_angle + self.angle_offset + level_angle
+
+            if self.growth_mode == 'inward':
+                distance = radius - child_radius
+            elif self.growth_mode == 'tangent':
+                distance = radius
+            elif self.growth_mode == 'overlapping':
+                distance = radius * (1 - self.scale_factor * 0.5)
+            else:  # outward
+                distance = radius + child_radius
+
+            child_x = center[0] + distance * np.cos(child_angle)
+            child_y = center[1] + distance * np.sin(child_angle)
+            children.append((child_x, child_y, child_angle))
+
+        if self.ordering_mode == 'alternating':
+            even = [c for i, c in enumerate(children) if i % 2 == 0]
+            odd = [c for i, c in enumerate(children) if i % 2 == 1]
+            children = even + odd
+        elif self.ordering_mode == 'spiral':
+            children = sorted(children, key=lambda c: c[2])
+        elif self.ordering_mode == 'reverse_spiral':
+            children = sorted(children, key=lambda c: c[2], reverse=True)
+
+        for child_x, child_y, child_angle in children:
+            self._generate_recursive((child_x, child_y), child_radius, level + 1, child_angle)
+
+class KececiCurve1:
+    # Optimize Keçeci Curve/Eğrisi - Sonuçları önbelleğe alır
+    # Ebeveynden bağımsız – dallar her seviyede global açılara sahiptir 
+    _cache = {}
+
+    def __init__(
+        self,
+        num_children: int = 5,
+        max_level: int = 3,
+        scale_factor: float = 0.45,
+        base_radius: float = 1.8,
+        angle_offset: float = 0.0,
+        angle_variation: float = 0.0,
+        growth_mode: str = 'outward',
+        ordering_mode: str = 'sequential',
+    ):
+        self.num_children = num_children
+        self.max_level = max_level
+        self.scale_factor = float(scale_factor)
+        self.base_radius = float(base_radius)
+        self.angle_offset = angle_offset
+        self.angle_variation = angle_variation
+        self.growth_mode = growth_mode
+        self.ordering_mode = ordering_mode
+        self.points = []
+        self._cache_key = (num_children, max_level, scale_factor, base_radius,
+                          angle_offset, angle_variation, growth_mode, ordering_mode)
+
+    def generate(self) -> List[Tuple[float, float]]:
+        if self._cache_key in self._cache:
+            return self._cache[self._cache_key]
+
+        self.points = []
+        self._generate_recursive(center=(0.0, 0.0), radius=self.base_radius, level=0, angle=0.0)
+        self._cache[self._cache_key] = self.points
+
+        if len(self._cache) > 50:
+            for key in list(self._cache.keys())[:10]:
+                del self._cache[key]
+        return self.points
+
+    def _generate_recursive(self, center: Tuple[float, float], radius: float, level: int, angle: float):
+        radius = float(radius)
+        if level > self.max_level:
+            self.points.append(center)
+            return
+
+        self.points.append(center)
+        child_radius = radius * self.scale_factor
+        children = []
+
+        for i in range(self.num_children):
+            # CHILD AÇISI: ebeveynden BAĞIMSIZ, sadece i, level, offset, variation
+            child_angle = (2 * np.pi * i / self.num_children +
+                          self.angle_offset +
+                          self.angle_variation * level)
+
+            if self.growth_mode == 'inward':
+                distance = radius - child_radius
+            elif self.growth_mode == 'tangent':
+                distance = radius
+            elif self.growth_mode == 'overlapping':
+                distance = radius * (1 - self.scale_factor * 0.5)
+            else:  # outward
+                distance = radius + child_radius
+
+            child_x = center[0] + distance * np.cos(child_angle)
+            child_y = center[1] + distance * np.sin(child_angle)
+            children.append((child_x, child_y, child_angle))
+
+        if self.ordering_mode == 'alternating':
+            even = [c for i, c in enumerate(children) if i % 2 == 0]
+            odd = [c for i, c in enumerate(children) if i % 2 == 1]
+            children = even + odd
+        elif self.ordering_mode == 'spiral':
+            children = sorted(children, key=lambda c: c[2])
+        elif self.ordering_mode == 'reverse_spiral':
+            children = sorted(children, key=lambda c: c[2], reverse=True)
+
+        # recursive çağrı: angle parametresi sadece depolanır (kullanılmaz)
+        for child_x, child_y, child_angle in children:
+            self._generate_recursive((child_x, child_y), child_radius, level + 1, child_angle)
+
+class KececiCurve2:
+    # Optimize Keçeci Curve/Eğrisi - Sonuçları önbelleğe alır
+    # Ebeveyne bağımlı (parent_angle eklenmiş) – her dal bir öncekinin yönünü devralır, spiral/yayvan desen oluşur.
+    _cache = {}
+
+    def __init__(
+        self,
+        num_children: int = 5,
+        max_level: int = 3,
+        scale_factor: float = 0.45,
+        base_radius: float = 1.8,
+        angle_offset: float = 0.0,
+        angle_variation: float = 0.0,
+        growth_mode: str = 'outward',
+        ordering_mode: str = 'sequential',
+    ):
+        self.num_children = num_children
+        self.max_level = max_level
+        self.scale_factor = float(scale_factor)
+        self.base_radius = float(base_radius)
+        self.angle_offset = angle_offset
+        self.angle_variation = angle_variation
+        self.growth_mode = growth_mode
+        self.ordering_mode = ordering_mode
+        self.points = []
+        self._cache_key = (num_children, max_level, scale_factor, base_radius,
+                          angle_offset, angle_variation, growth_mode, ordering_mode)
+
+    def generate(self) -> List[Tuple[float, float]]:
+        if self._cache_key in self._cache:
+            return self._cache[self._cache_key]
+
+        self.points = []
+        # Başlangıç açısı 0.0
+        self._generate_recursive(center=(0.0, 0.0), radius=self.base_radius, level=0, parent_angle=0.0)
+        self._cache[self._cache_key] = self.points
+
+        if len(self._cache) > 50:
+            for key in list(self._cache.keys())[:10]:
+                del self._cache[key]
+        return self.points
+
+    def _generate_recursive(self, center: Tuple[float, float], radius: float, level: int, parent_angle: float):
+        radius = float(radius)
+        if level > self.max_level:
+            self.points.append(center)
+            return
+
+        self.points.append(center)
+        child_radius = radius * self.scale_factor
+        children = []
+
+        for i in range(self.num_children):
+            # Child açısı = ebeveyn açısı + taban açı + seviye bazlı varyasyon
+            base_angle = 2 * np.pi * i / self.num_children
+            child_angle = parent_angle + base_angle + self.angle_offset + self.angle_variation * level
+
+            if self.growth_mode == 'inward':
+                distance = radius - child_radius
+            elif self.growth_mode == 'tangent':
+                distance = radius
+            elif self.growth_mode == 'overlapping':
+                distance = radius * (1 - self.scale_factor * 0.5)
+            else:  # outward
+                distance = radius + child_radius
+
+            child_x = center[0] + distance * np.cos(child_angle)
+            child_y = center[1] + distance * np.sin(child_angle)
+            children.append((child_x, child_y, child_angle))
+
+        # ordering_mode göre sıralama
+        if self.ordering_mode == 'alternating':
+            even = [c for i, c in enumerate(children) if i % 2 == 0]
+            odd = [c for i, c in enumerate(children) if i % 2 == 1]
+            children = even + odd
+        elif self.ordering_mode == 'spiral':
+            children = sorted(children, key=lambda c: c[2])
+        elif self.ordering_mode == 'reverse_spiral':
+            children = sorted(children, key=lambda c: c[2], reverse=True)
+
+        for child_x, child_y, child_angle in children:
+            self._generate_recursive((child_x, child_y), child_radius, level + 1, child_angle)
+"""
+class KececiCurve:
+    _cache = {}
+
+    def __init__(
+        self,
+        num_children: int = 5,
+        max_level: int = 3,
+        scale_factor: float = 0.45,
+        base_radius: float = 1.8,
+        angle_offset: float = 0.0,
+        angle_variation: float = 0.0,
+        growth_mode: str = 'outward',
+        ordering_mode: str = 'sequential',
+    ):
+        self.num_children = num_children
+        self.max_level = max_level
+        self.scale_factor = float(scale_factor)
+        self.base_radius = float(base_radius)
+        self.angle_offset = angle_offset
+        self.angle_variation = angle_variation
+        self.growth_mode = growth_mode
+        self.ordering_mode = ordering_mode
+        self.points = []
+        self._cache_key = (num_children, max_level, scale_factor, base_radius,
+                          angle_offset, angle_variation, growth_mode, ordering_mode)
+
+    def generate(self):
+        if self._cache_key in self._cache:
+            return self._cache[self._cache_key]
+        self.points = []
+        self._generate_recursive(center=(0.0, 0.0), radius=self.base_radius, level=0, angle=0.0)
+        self._cache[self._cache_key] = self.points
+        if len(self._cache) > 50:
+            for key in list(self._cache.keys())[:10]:
+                del self._cache[key]
+        return self.points
+
+    def _generate_recursive(self, center, radius, level, angle):
+        radius = float(radius)
+        if level > self.max_level:
+            self.points.append(center)
+            return
+        self.points.append(center)
+        child_radius = radius * self.scale_factor
+        child_radius = float(child_radius)
+        children = []
+
+        for i in range(self.num_children):
+            child_angle = (2 * np.pi * i / self.num_children +
+                          self.angle_offset +
+                          self.angle_variation * level)
+
+            if self.growth_mode == 'inward':
+                distance = radius - child_radius
+            elif self.growth_mode == 'tangent':
+                distance = radius
+            elif self.growth_mode == 'overlapping':
+                distance = radius * (1 - self.scale_factor * 0.5)
+            else:  # outward
+                distance = radius + child_radius
+
+            child_x = center[0] + distance * np.cos(child_angle)
+            child_y = center[1] + distance * np.sin(child_angle)
+            children.append((child_x, child_y, child_angle))
+
+        if self.ordering_mode == 'alternating':
+            even = [c for i, c in enumerate(children) if i % 2 == 0]
+            odd = [c for i, c in enumerate(children) if i % 2 == 1]
+            children = even + odd
+        elif self.ordering_mode == 'spiral':
+            children = sorted(children, key=lambda c: c[2])
+        elif self.ordering_mode == 'reverse_spiral':
+            children = sorted(children, key=lambda c: c[2], reverse=True)
+
+        for child_x, child_y, _ in children:
+            self._generate_recursive((child_x, child_y), child_radius, level + 1, child_angle)
+
+    def _add_point(self, center, radius, level):
+        self.points.append(center)
+        if level >= self.max_level:
+            return
+        child_radius = radius * self.scale_factor
+        for i in range(self.num_children):
+            angle = 2 * np.pi * i / self.num_children + level * 0.2  # açı kayması
+            if self.growth_mode == 'outward':
+                dist = radius + child_radius
+            elif self.growth_mode == 'inward':
+                dist = radius - child_radius
+            else:
+                dist = radius
+            x = center[0] + dist * np.cos(angle)
+            y = center[1] + dist * np.sin(angle)
+            self._add_point((x, y), child_radius, level + 1)
+"""
+"""
+class KececiCurve:
+    # Optimize Keçeci Curve/Eğrisi - Sonuçları önbelleğe alır
     
     _cache = {}
     
     def __init__(
         self,
-        num_children: int = 6,
+        num_children: int = 5,
         max_level: int = 3,
         scale_factor: float = 0.45,
         base_radius: float = 1.8,
@@ -974,7 +1381,7 @@ class KececiCurve:
         
         for child_x, child_y, child_angle in children:
             self._generate_recursive((child_x, child_y), child_radius, level + 1, child_angle)
-
+"""
 
 # ============================================================================
 # HIZLI GÖRSELLEŞTİRME FONKSİYONU
@@ -2905,7 +3312,7 @@ def plot_sierpinski_curve(order: int):
     plt.tight_layout()
     plt.show()
     
-    return fig
+    #return fig
 
 
 def plot_sierpinski_process():
@@ -7005,18 +7412,21 @@ def show_menu():
                lambda: CurveComparisonVisualizer().generate_locality_comparison()),
         '51': ('Keçeci Parametric Variations / Keçeci Parametrik Varyasyonları',
                lambda: CurveComparisonVisualizer().generate_kececi_variations()),
-        '52': ('Detailed Radar Comparison / Detaylı Radar Karşılaştırması',
+        '52': ('Keçeci Parametric Variations / Keçeci Parametrik Varyasyonları (inherit_parent_angle=True)',
+               lambda: CurveComparisonVisualizer().generate_kececi_variations2()),
+        '53': ('Detailed Radar Comparison / Detaylı Radar Karşılaştırması',
                lambda: CurveComparisonVisualizer().generate_radar_comparison()),
-        '53': ('Locality Heatmap – Both Normalizations / Lokalite Isı Haritası – İki Normalizasyon',
+        '54': ('Locality Heatmap – Both Normalizations / Lokalite Isı Haritası – İki Normalizasyon',
                locality_heatmap_both_versions),
-        # KRİPTO MADDELERİ (54-59)
-        '54': ('Görüntü Şifreleme/Deşifreleme (Encrypt/Decrypt)', demo_encrypt_decrypt),
+        # KRİPTO MADDELERİ (55-60)
         '55': ('Görüntü İmzalama ve Doğrulama (Signature & Verify)', demo_signature),
         '56': ('Keçeci Örnekleme RNG (Sampling RNG)', demo_sampling_rng),
         '57': ('Görüntüden Anahtar Türetme (Key Derivation)', demo_key_derivation),
         '58': ('Toplu Görüntü Şifreleme (Batch Encrypt)', demo_batch_encrypt),
         '59': ('Permütasyon Parametrelerini Anahtar Olarak Kullanma', demo_params_as_key),
-        '60': ('🐢 Kaplumbağa Ninja vs 🐇 Beyaz Tavşan Oyunu (Rastgele Sayı Tahmin)', oyun_kaplumbaga_tavsan),
+        '60': ('Görüntü Şifreleme/Deşifreleme (Encrypt/Decrypt)', demo_encrypt_decrypt),
+        '61': ('🐢 Kaplumbağa Ninja vs 🐇 Beyaz Tavşan Oyunu (Rastgele Sayı Tahmin)', oyun_kaplumbaga_tavsan),
+
     }
 
     # Grup başlıkları
@@ -7027,9 +7437,9 @@ def show_menu():
         ("KUANTUM ALGORİTMALARI / QUANTUM ALGORITHMS", range(26, 37)),
         ("KEÇECİ PARAMETRE ETKİLERİ / KEÇECİ PARAMETER EFFECTS", range(37, 42)),
         ("SİERPİNSKİ & PEANO ÖZEL / SIERPINSKI & PEANO SPECIALS", range(42, 49)),
-        ("EK KARŞILAŞTIRMA VE ANALİZLER / ADDITIONAL COMPARISONS & ANALYSES", range(49, 54)),
-        ("KRİPTOGRAFİ / CRYPTOGRAPHY", range(54, 60)),   # 54-59 arası
-        ("🎮 OYUN / GAME", range(60, 61)),
+        ("EK KARŞILAŞTIRMA VE ANALİZLER / ADDITIONAL COMPARISONS & ANALYSES", range(49, 55)),
+        ("KRİPTOGRAFİ / CRYPTOGRAPHY", range(55, 61)),   # 54-59 arası
+        ("🎮 OYUN / GAME", range(61, 62)),
     ]
 
     while True:
@@ -7050,7 +7460,7 @@ def show_menu():
         print("   0. Exit / Çıkış")
         print("="*70)
 
-        choice = input("Seçiminiz (0-59): ").strip()
+        choice = input("Seçiminiz (0-60): ").strip()
 
         if choice == '0':
             print("Programdan çıkılıyor... / Exiting...")
