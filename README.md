@@ -81,6 +81,8 @@ Bu depo aynı zamanda Hilbert, Morton, Moore ve Sierpinski eğrilerini de içeri
 
 ![Keçeci Curve Gallery](https://...)
 
+0.1.6: inherit_parent_angle=False (default) or inherit_parent_angle=True
+
 ---
 
 ## ✨ Öne Çıkan Özellikler
