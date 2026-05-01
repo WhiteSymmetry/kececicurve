@@ -79,7 +79,7 @@ Dairesel geometri, ayarlanabilir çocuk sayısı, büyüme yönü, sıralama str
 
 Bu depo aynı zamanda Hilbert, Morton, Moore ve Sierpinski eğrilerini de içerir; lokalite (yerellik) karşılaştırmaları, süreklilik analizleri ve **ileri kuantum fenomenlerinin (Majorana, Weyl, topolojik yarımetaller, Stratum modeli)** 2B/3B görselleştirmelerini sunar.
 
-![Keçeci Curve Gallery](https://...)
+![Keçeci Curve Example](https://github.com/WhiteSymmetry/kececicurve/blob/main/example/kc_example.ipynb)
 
 0.1.6: inherit_parent_angle=False (default) or inherit_parent_angle=True
 
