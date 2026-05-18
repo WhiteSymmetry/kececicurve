@@ -5,10 +5,11 @@
 # Dependabot configuration for automatic dependency updates
 version: 2
 updates:
-  # Enable version updates for npm
-  - package-ecosystem: "npm"
-    # Look for `package.json` and `lock` files in the `root` directory
-    directory: "/"
-    # Check the npm registry for updates every day (weekdays)
+  - package-ecosystem: "pip" # Specify package ecosystem (e.g., pip, npm, maven)
+    directory: "/"           # Location of package manifests
     schedule:
-      interval: "daily"
+      interval: "weekly"     # Check for updates weekly
+    open-pull-requests-limit: 10 # Limit the number of open pull requests
+    ignore:
+      - dependency-name: "example-package" # Specify dependencies to ignore, if any
+        versions: ["==1.*"] # Ignore all patch versions of 1.x
