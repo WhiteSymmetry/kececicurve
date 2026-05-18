@@ -450,6 +450,8 @@ If this library was useful to you in your research, please cite us. Following th
 
 ```
 
+Keçeci, M. (2026). Keçeci Eğrisi Âilesinin Yerellik Performansı ve Kuantum Durum Simülasyonlarındaki Uygulamaları. Open Science Articles (OSAs), Zenodo. https://doi.org/10.5281/zenodo.20263326
+
 Keçeci, M. (2026). kececicurve. IEEE Dataport. https://dx.doi.org/10.21227/s756-cy21 
 
 Keçeci, M. (2026). Keçeci Curve: A Circular-Based Parametric Space-Filling Curve Family. Open Science Articles (OSAs), Zenodo. https://doi.org/10.5281/zenodo.19885259
