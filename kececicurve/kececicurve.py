@@ -1038,6 +1038,123 @@ class KececiCurve:
         for child_x, child_y, child_angle in children:
             self._generate_recursive((child_x, child_y), child_radius, level + 1, child_angle)
 
+    # =========================================================================
+    #  EĞRİ SEYRELTME (DECIMATION) METODLARI
+    # =========================================================================
+    def ramer_douglas_peucker(self, points, epsilon):
+        """
+        Ramer-Douglas-Peucker algoritması ile eğri noktalarını seyreltir.
+        
+        Args:
+            points (List[Tuple[float, float]]): Seyreltilecek nokta listesi.
+            epsilon (float): Maksimum sapma toleransı. Daha yüksek değer, daha az nokta.
+            
+        Returns:
+            List[Tuple[float, float]]: Seyreltilmiş nokta listesi.
+        """
+        if len(points) < 3:
+            return points
+
+        # Başlangıç ve bitiş noktalarını bul
+        start, end = points[0], points[-1]
+        line_vec = np.array(end) - np.array(start)
+        line_len = np.linalg.norm(line_vec)
+        
+        if line_len == 0:
+            return points
+
+        # En uzak noktayı ve mesafesini bul
+        max_dist = 0
+        max_idx = 0
+        for i in range(1, len(points) - 1):
+            point = np.array(points[i])
+            # Noktanın doğruya olan dik mesafesi
+            t = np.dot(point - np.array(start), line_vec) / (line_len ** 2)
+            if t < 0:
+                t = 0
+            elif t > 1:
+                t = 1
+            projection = np.array(start) + t * line_vec
+            dist = np.linalg.norm(point - projection)
+            if dist > max_dist:
+                max_dist = dist
+                max_idx = i
+
+        # Eğer mesafe toleransı aşıyorsa, noktayı koru ve alt bölümlere ayır
+        if max_dist > epsilon:
+            left = self.ramer_douglas_peucker(points[:max_idx + 1], epsilon)
+            right = self.ramer_douglas_peucker(points[max_idx:], epsilon)
+            return left[:-1] + right
+        else:
+            return [start, end]
+
+    def simplify_by_distance(self, points, min_distance):
+        """
+        Ardışık noktalar arasındaki mesafe belirli bir değerin altındaysa
+        aradaki noktaları atar. Daha hızlıdır ancak geometrik yapıyı 
+        Ramer-Douglas-Peucker kadar iyi korumayabilir.
+        
+        Args:
+            points (List[Tuple[float, float]]): Seyreltilecek nokta listesi.
+            min_distance (float): Minimum mesafe eşiği. Bu değerden kısa mesafelerdeki 
+                                  ara noktalar atılır.
+        
+        Returns:
+            List[Tuple[float, float]]: Seyreltilmiş nokta listesi.
+        """
+        if len(points) < 2:
+            return points
+            
+        simplified = [points[0]]
+        last_kept = points[0]
+        
+        for i in range(1, len(points)):
+            current = points[i]
+            dist = np.linalg.norm(np.array(current) - np.array(last_kept))
+            if dist >= min_distance:
+                simplified.append(current)
+                last_kept = current
+                
+        # Eğer son nokta eklenmemişse ekle
+        if len(simplified) < 2 or simplified[-1] != points[-1]:
+            simplified.append(points[-1])
+            
+        return simplified
+
+    def decimate(self, method='rdp', **kwargs):
+        """
+        Eğri noktalarını seyreltir. generate() metodundan sonra çağrılmalıdır.
+        
+        Args:
+            method (str): 'rdp' (Ramer-Douglas-Peucker) veya 'distance'.
+            **kwargs: 
+                - epsilon (float): RDP için tolerans (varsayılan: 0.05).
+                - min_distance (float): Mesafe tabanlı yöntem için eşik (varsayılan: 0.1).
+        
+        Returns:
+            List[Tuple[float, float]]: Seyreltilmiş nokta listesi.
+        """
+        if not self.points:
+            print("Uyarı: Önce generate() çağrılmalı.")
+            return []
+            
+        original_count = len(self.points)
+        
+        if method == 'rdp':
+            epsilon = kwargs.get('epsilon', 0.05)
+            simplified = self.ramer_douglas_peucker(self.points, epsilon)
+        elif method == 'distance':
+            min_dist = kwargs.get('min_distance', 0.1)
+            simplified = self.simplify_by_distance(self.points, min_dist)
+        else:
+            raise ValueError("Geçersiz method. 'rdp' veya 'distance' kullanın.")
+        
+        new_count = len(simplified)
+        reduction = (1 - new_count / original_count) * 100
+        print(f"Seyreltme ({method}): {original_count} -> {new_count} nokta (%%{reduction:.1f} azalma)")
+        
+        return simplified
+
 class KececiCurve1:
     # Optimize Keçeci Curve/Eğrisi - Sonuçları önbelleğe alır
     # Ebeveynden bağımsız – dallar her seviyede global açılara sahiptir 
@@ -7313,6 +7430,51 @@ def oyun_kaplumbaga_tavsan():
     
     input("\nMenüye dönmek için Enter'a basın...")
 
+def _decimate_demo():
+    """Keçeci Eğrisi'nde orijinal, RDP ve mesafe tabanlı seyreltmeyi karşılaştırır."""
+    from kececicurve import KececiCurve
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    # Eğri oluştur (yeterince yoğun)
+    curve = KececiCurve(num_children=5, max_level=5, scale_factor=0.42,
+                        growth_mode='outward', ordering_mode='spiral')
+    original = curve.generate()
+    print(f"Orijinal nokta sayısı: {len(original)}")
+
+    # RDP ile seyreltme (epsilon=0.05)
+    rdp_points = curve.decimate(method='rdp', epsilon=0.05)
+    # Mesafe tabanlı seyreltme (min_distance=0.2)
+    dist_points = curve.decimate(method='distance', min_distance=0.2)
+
+    # Karşılaştırmalı çizim
+    fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+    fig.suptitle("Keçeci Eğrisi: Orijinal vs Seyreltilmiş", fontsize=14)
+
+    # Orijinal
+    ax0 = axes[0]
+    ax0.set_title(f"Orijinal ({len(original)} nokta)")
+    orig = np.array(original)
+    ax0.plot(orig[:,0], orig[:,1], 'b-', linewidth=0.8, alpha=0.7)
+    ax0.set_aspect('equal'); ax0.axis('off')
+
+    # RDP
+    ax1 = axes[1]
+    ax1.set_title(f"RDP (ε=0.05) – {len(rdp_points)} nokta")
+    rdp = np.array(rdp_points)
+    ax1.plot(rdp[:,0], rdp[:,1], 'r-', linewidth=1.2, alpha=0.9)
+    ax1.set_aspect('equal'); ax1.axis('off')
+
+    # Mesafe tabanlı
+    ax2 = axes[2]
+    ax2.set_title(f"Mesafe (min_dist=0.2) – {len(dist_points)} nokta")
+    dist = np.array(dist_points)
+    ax2.plot(dist[:,0], dist[:,1], 'g-', linewidth=1.2, alpha=0.9)
+    ax2.set_aspect('equal'); ax2.axis('off')
+
+    plt.tight_layout()
+    plt.show()
+
 def show_menu():
     """Kullanıcı menüsü – İngilizce + Türkçe, konularına göre gruplandırılmış"""
     menu_options = {
@@ -7426,6 +7588,7 @@ def show_menu():
         '59': ('Permütasyon Parametrelerini Anahtar Olarak Kullanma', demo_params_as_key),
         '60': ('Görüntü Şifreleme/Deşifreleme (Encrypt/Decrypt)', demo_encrypt_decrypt),
         '61': ('🐢 Kaplumbağa Ninja vs 🐇 Beyaz Tavşan Oyunu (Rastgele Sayı Tahmin)', oyun_kaplumbaga_tavsan),
+        "62": ("Decimation / Seyreltme (RDP ve Distance Karşılaştırması)", _decimate_demo),
 
     }
 
@@ -7440,6 +7603,7 @@ def show_menu():
         ("EK KARŞILAŞTIRMA VE ANALİZLER / ADDITIONAL COMPARISONS & ANALYSES", range(49, 55)),
         ("KRİPTOGRAFİ / CRYPTOGRAPHY", range(55, 61)),   # 54-59 arası
         ("🎮 OYUN / GAME", range(61, 62)),
+        ("Decimation/Seyreltme", range(62, 63)),
     ]
 
     while True:
@@ -7460,7 +7624,7 @@ def show_menu():
         print("   0. Exit / Çıkış")
         print("="*70)
 
-        choice = input("Seçiminiz (1-61): ").strip()
+        choice = input("Seçiminiz (1-62): ").strip()
 
         if choice == '0':
             print("Programdan çıkılıyor... / Exiting...")
