@@ -22,7 +22,9 @@ identifiers:
   - type: doi
     value: 10.5281/zenodo.19885259
   - type: doi
-    value: https://dx.doi.org/10.21227/s756-cy21
+    value: 10.21227/s756-cy21
+  - type: doi
+    value: 10.5281/zenodo.20263326
 repository-code: 'https://github.com/WhiteSymmetry/kececicurve'
 url: 'https://github.com/WhiteSymmetry/kececicurve'
 repository: 'https://anaconda.org/bilgi/kececicurve'
