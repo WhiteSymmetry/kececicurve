@@ -272,7 +272,11 @@ Bu interaktif menü, **çiçek desenlerinden kuantum algoritmalarına** kadar 30
   🎮 OYUN / GAME
   --------------------------------------------------------------------
   61. 🐢 Kaplumbağa Ninja vs 🐇 Beyaz Tavşan Oyunu (Rastgele Sayı Tahmin)
-
+      
+  Decimation / Seyreltme
+  --------------------------------------------------------------------
+  62. Decimation / Seyreltme (RDP ve Distance Karşılaştırması)
+      
   --------------------------------------------------------------------
    0. Exit / Çıkış
 ======================================================================
