@@ -3,8 +3,9 @@ kececicurve - Parametric Space-Filling Curve Family
 Keçeci Eğrisi: Tamamen özgün, çok amaçlı ve esnek bir fraktal eğri üreteci.
 """
 
-__version__ = "0.1.6"
+__version__ = "0.1.7"
 __author__ = "Mehmet Keçeci"
+__main__ = "0.1.7"
 
 from .kececicurve import (
     # Temel eğri sınıfları
@@ -87,6 +88,7 @@ from .kececicurve import (
     get_permutation,
     _safe_kececi_points,
     oyun_kaplumbaga_tavsan,
+    _decimate_demo,
     
     # Menü
     show_menu,
@@ -155,4 +157,5 @@ __all__ = [
     "get_permutation",
     "_safe_kececi_points",
     "oyun_kaplumbaga_tavsan",
+    "_decimate_demo",
 ]
