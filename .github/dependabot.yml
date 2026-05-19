@@ -20,3 +20,13 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "conda"
+    directory: "/"
+    schedule:
+      interval: "monthly"
