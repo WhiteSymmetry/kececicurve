@@ -29,8 +29,10 @@ jobs:
           pip install -r requirements.txt
 
       - name: Generate project.json
+        env:
+          MODE: ${{ inputs.mode }}
         run: |
-          python project_json.py --mode "${{ inputs.mode }}"
+          python project_json.py --mode "$MODE"
 
       - name: Commit changes
         run: |
