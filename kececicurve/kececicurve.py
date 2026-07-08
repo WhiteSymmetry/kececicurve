@@ -28,6 +28,9 @@ Quantum State Visualization with Keçeci Curves
 
 Keçeci Curve - Parametrik Uzay Doldurma Eğrisi Ailesi
 Tamamen özgün, çok amaçlı ve esnek bir fraktal eğri üreteci
+
+pip install -U kha256 matplotlib numpy Pillow scipy
+
 """
 
 import colorsys
@@ -64,7 +67,7 @@ from matplotlib import patches
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import os
-from PIL import Image
+from PIL import Image # pip install -U Pillow
 import random
 from scipy.spatial import cKDTree, KDTree
 from scipy.spatial.distance import pdist
