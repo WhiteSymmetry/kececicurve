@@ -1,6 +1,7 @@
 name: kececicurve
 channels:
   - conda-forge
+  - bilgi
 dependencies:
   - python >=3.11
   - kha256
