@@ -18,7 +18,7 @@
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/10536/badge)](https://www.bestpractices.dev/projects/10536)
 
 [![Python CI](https://github.com/WhiteSymmetry/kececicurve/actions/workflows/python_ci.yml/badge.svg?branch=main)](https://github.com/WhiteSymmetry/kececicurve/actions/workflows/python_ci.yml)
-[![codecov](https://codecov.io/gh/WhiteSymmetry/kececicurve/graph/badge.svg?token=0X78S7TL0W)](https://codecov.io/gh/WhiteSymmetry/kececicurve)
+[![codecov](https://codecov.io/gh/WhiteSymmetry/kececicurve/graph/badge.svg?token=9GTLPAM8J7)](https://codecov.io/gh/WhiteSymmetry/kececicurve)
 [![Documentation Status](https://readthedocs.org/projects/kececicurve/badge/?version=latest)](https://kececicurve.readthedocs.io/en/latest/)
 [![Binder](https://terrarium.evidencepub.io/badge_logo.svg)](https://terrarium.evidencepub.io/v2/gh/WhiteSymmetry/kececicurve/HEAD)
 
