@@ -1,6 +1,6 @@
 # requirements-dev.txt
-numpy
-matplotlib
-scipy
-chess
 kha256
+matplotlib
+numpy
+Pillow
+scipy
