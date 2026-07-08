@@ -5,6 +5,10 @@
 # Dependabot configuration for automatic dependency updates
 # Dependabot configuration for automatic dependency updates
 version: 2
+
+on:
+  workflow_dispatch:
+
 updates:
   # 1) Python paketleri (Eğer conda kullanmıyorsanız açık kalsın)
   - package-ecosystem: "pip"
