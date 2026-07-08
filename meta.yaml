@@ -24,12 +24,16 @@ requirements:
   host:
     - python {{ python }}
     - numpy
+    - pip
     - setuptools
     # Other build tools
   run:
     - python >=3.11
+    - kha256
+    - matplotlib
     - numpy
-    # Other runtime dependencies
+    - Pillow
+    - scipy
   build:
     - python >=3.11
     - pip
@@ -38,9 +42,18 @@ requirements:
 
 test:
   requires:
+    - python >=3.11
+    - kha256
+    - matplotlib
     - numpy
+    - Pillow
+    - scipy
   imports:
+    - kha256
+    - matplotlib
     - numpy
+    - Pillow
+    - scipy
 
 about:
   home: https://github.com/WhiteSymmetry/kececicurve
