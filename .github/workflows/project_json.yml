@@ -2,16 +2,18 @@ name: Generate project.json
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 3 * * *"
+    inputs:
+      mode:
+        description: "Üretim modu"
+        required: false
+        default: "auto"
 
 permissions:
   contents: write
 
 jobs:
-  build:
+  generate:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -28,17 +30,12 @@ jobs:
 
       - name: Generate project.json
         run: |
-          python project_json.py
-
-      - name: Verify output
-        run: |
-          test -f project.json
-          cat project.json
+          python project_json.py --mode "${{ inputs.mode }}"
 
       - name: Commit changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add project.json
-          git diff --cached --quiet || git commit -m "Generate project.json"
+          git diff --cached --quiet || git commit -m "chore: generate project.json"
           git push
