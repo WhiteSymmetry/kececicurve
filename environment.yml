@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - bilgi
 dependencies:
-  - python >=3.11
+  - python>=3.14.6
   - kha256
   - matplotlib
   - numpy
