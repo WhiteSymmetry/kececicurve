@@ -15,7 +15,7 @@ updates:
     open-pull-requests-limit: 10  # Tırnak işaretleri kaldırıldı
     ignore:
       - dependency-name: "example-package"
-        version-requirement: "1.*" # Şemaya uygun hale getirildi
+        versions: ["1.*"]
 
   # 2) GitHub Actions (actions/... ve github/...)
   - package-ecosystem: "github-actions"
