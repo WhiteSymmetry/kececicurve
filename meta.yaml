@@ -11,6 +11,7 @@ source:
 
 channels:
   - conda-forge
+  - bilgi
 
 build:
   noarch: python  # Platformdan bağımsız bir paket oluşturur
