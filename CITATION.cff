@@ -34,7 +34,7 @@ abstract: >-
 keywords:
   - space
   - curve
-  -kececicurve
+  - kececicurve
 license: AGPL-3.0-or-later
 commit: 'Revision: 1'
 version: 0.1.8
