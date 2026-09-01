@@ -7478,6 +7478,92 @@ def _decimate_demo():
     plt.tight_layout()
     plt.show()
 
+# ============================================================
+# JULIA SET HELPER FUNCTIONS (Keçeci eğrisi ile entegre)
+# ============================================================
+
+import numpy as np
+import matplotlib.pyplot as plt
+from kececicurve import KececiCurve  # Eğer modülün içine ekliyorsan bu satırı sil
+
+def julia(z, c=-0.7+0.27j, max_iter=30):
+    """
+    Bir karmaşık sayı veya numpy array için Julia kümesi iterasyon sayısını hesaplar.
+    
+    Parametreler:
+        z : complex veya np.ndarray (karmaşık)
+        c : complex, Julia parametresi
+        max_iter : int, maksimum iterasyon
+    
+    Dönüş:
+        int veya np.ndarray (iterasyon sayısı)
+    """
+    z = np.asarray(z, dtype=np.complex128)
+    output = np.zeros(z.shape, dtype=int)
+    
+    for i in range(max_iter):
+        mask = np.abs(z) <= 2
+        if not np.any(mask):
+            break
+        z[mask] = z[mask]**2 + c
+        output[mask] += 1
+    
+    # Kaçan noktalar 0, kaçmayanlar max_iter olur (isteğe bağlı)
+    return np.where(np.abs(z) <= 2, max_iter, output)
+
+
+def plot_julia_on_kececi(num_children=4, max_level=4, grid_size=32, 
+                         c=-0.7+0.27j, max_iter=30, cmap='twilight', 
+                         growth_mode='outward', figsize=(8,8)):
+    """
+    Keçeci eğrisi noktalarını Julia kümesi değerleriyle renklendirir.
+    
+    Parametreler:
+        num_children, max_level, growth_mode : Keçeci eğrisi parametreleri
+        grid_size : Görüntü çözünürlüğü (grid_size x grid_size)
+        c : Julia parametresi (karmaşık sayı)
+        max_iter : Maksimum iterasyon
+        cmap : Renk haritası
+        figsize : Grafik boyutu
+    """
+    # 1. Keçeci eğrisini oluştur
+    curve = KececiCurve(num_children=num_children, max_level=max_level, 
+                        growth_mode=growth_mode)
+    pts = np.array(curve.generate())
+    
+    # 2. Noktaları [0,1] arasına normalize et
+    min_vals = pts.min(axis=0)
+    max_vals = pts.max(axis=0)
+    pts_norm = (pts - min_vals) / (max_vals - min_vals + 1e-12)
+    
+    # 3. Grid indekslerine dönüştür (güvenli sınırlama ile)
+    grid_pts = (pts_norm * (grid_size - 1)).astype(int)
+    grid_pts = np.clip(grid_pts, 0, grid_size - 1)
+    
+    # 4. Her grid noktası için Julia değerini hesapla (vektörize)
+    x_coords = grid_pts[:, 0]
+    y_coords = grid_pts[:, 1]
+    
+    # Karmaşık düzlemde koordinatlar (-2..2 aralığı)
+    real_vals = -2 + 4 * x_coords / (grid_size - 1)
+    imag_vals = -2 + 4 * y_coords / (grid_size - 1)
+    z_vals = real_vals + 1j * imag_vals
+    
+    # Julia iterasyonlarını hesapla
+    julia_vals = julia(z_vals, c=c, max_iter=max_iter)
+    
+    # 5. Görselleştir
+    plt.figure(figsize=figsize)
+    scatter = plt.scatter(pts_norm[:,0], pts_norm[:,1], 
+                          c=julia_vals, cmap=cmap, 
+                          s=80, edgecolors='k', linewidth=0.2)
+    plt.axis('equal')
+    plt.title(f'Keçeci Eğrisi × Julia Set (c = {c.real:.2f} + {c.imag:.2f}i)')
+    plt.colorbar(scatter, label='İterasyon Sayısı')
+    plt.show()
+    
+    return pts_norm, julia_vals
+
 def show_menu():
     """Kullanıcı menüsü – İngilizce + Türkçe, konularına göre gruplandırılmış"""
     menu_options = {
