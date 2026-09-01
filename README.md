@@ -276,6 +276,10 @@ Bu interaktif menü, **çiçek desenlerinden kuantum algoritmalarına** kadar 30
   Decimation / Seyreltme
   --------------------------------------------------------------------
   62. Decimation / Seyreltme (RDP ve Distance Karşılaştırması)
+
+  Julia Set
+  --------------------------------------------------------------------
+  63. Keçeci Eğrisi x Julia Set (kececicurve x Julia Set)
       
   --------------------------------------------------------------------
    0. Exit / Çıkış
