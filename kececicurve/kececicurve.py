@@ -7674,6 +7674,7 @@ def show_menu():
         '60': ('Görüntü Şifreleme/Deşifreleme (Encrypt/Decrypt)', demo_encrypt_decrypt),
         '61': ('🐢 Kaplumbağa Ninja vs 🐇 Beyaz Tavşan Oyunu (Rastgele Sayı Tahmin)', oyun_kaplumbaga_tavsan),
         "62": ("Decimation / Seyreltme (RDP ve Distance Karşılaştırması)", _decimate_demo),
+        "63": ("Keçeci Eğrisi x Julia Set (kececicurve x Julia Set)", plot_julia_on_kececi),
 
     }
 
@@ -7689,6 +7690,7 @@ def show_menu():
         ("KRİPTOGRAFİ / CRYPTOGRAPHY", range(55, 61)),   # 54-59 arası
         ("🎮 OYUN / GAME", range(61, 62)),
         ("Decimation/Seyreltme", range(62, 63)),
+        ("Julia Set", range(63, 64)),
     ]
 
     while True:
@@ -7709,7 +7711,7 @@ def show_menu():
         print("   0. Exit / Çıkış")
         print("="*70)
 
-        choice = input("Seçiminiz (1-62): ").strip()
+        choice = input("Seçiminiz (1-63): ").strip()
 
         if choice == '0':
             print("Programdan çıkılıyor... / Exiting...")
