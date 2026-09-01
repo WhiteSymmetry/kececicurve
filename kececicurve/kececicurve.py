@@ -7482,10 +7482,6 @@ def _decimate_demo():
 # JULIA SET HELPER FUNCTIONS (Keçeci eğrisi ile entegre)
 # ============================================================
 
-import numpy as np
-import matplotlib.pyplot as plt
-from kececicurve import KececiCurve  # Eğer modülün içine ekliyorsan bu satırı sil
-
 def julia(z, c=-0.7+0.27j, max_iter=30):
     """
     Bir karmaşık sayı veya numpy array için Julia kümesi iterasyon sayısını hesaplar.
