@@ -27,7 +27,7 @@ sqlalchemy = ">=2.0.45"
 build = "python -m build"
 start = "python -c 'import kececicurve; print(kececicurve.__version__)'"
 lint = "ruff check ."
-fmt = "ruff format ."
+#fmt = "ruff format ."
 serve = { cmd = "python -m http.server", cwd = "docs" }
 install-kececicurve = "pip install git+https://github.com/WhiteSymmetry/kececicurve"
 install = "pip install -e ."
