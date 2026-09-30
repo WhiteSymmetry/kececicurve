@@ -32,7 +32,7 @@ serve = { cmd = "python -m http.server", cwd = "docs" }
 install-kececicurve = "pip install git+https://github.com/WhiteSymmetry/kececicurve"
 install = "pip install -e ."
 test = { depends-on = ["install"], cmd = "pytest" }
-install-deps = "pip install kececicurve"
+#install-deps = "pip install kececicurve"
 
 [package.build.backend]
 name = "pixi-build-python"
