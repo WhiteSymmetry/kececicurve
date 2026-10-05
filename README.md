@@ -74,6 +74,10 @@
 
 # 🌿 Keçeci Curve (kececicurve: Keçeci Eğrisi)  – Parametric Space-Filling Curve Family
 
+Keçeci Curve is a new, fully original, and highly flexible member of the space-filling curve family. It is a parametric fractal curve generator that goes beyond classical constructions by supporting circular geometry, a configurable number of children per node, growth direction, ordering strategies, and angular variations.
+
+This repository also includes implementations of the Hilbert, Morton, Moore, and Sierpiński curves. It provides tools for locality comparisons, continuity analyses, and advanced visualizations of 2D/3B structures arising in quantum phenomena such as Majorana modes, Weyl points, topological semimetals, and the Stratum model.
+
 **Keçeci Eğrisi**, uzay doldurma eğrileri ailesine yeni, tamamen özgün ve son derece esnek bir üyedir.  
 Dairesel geometri, ayarlanabilir çocuk sayısı, büyüme yönü, sıralama stratejileri ve açı varyasyonları ile **klasik eğrilerin ötesine geçen** parametrik bir fraktal eğri üretecidir.
 
