@@ -621,6 +621,8 @@ If this library was useful to you in your research, please cite us. Following th
 
 ```
 
+Keçeci, M. (2026). kececicurve (Version V1) [Data set]. Open Dataverse Articles (ODAs), Harvard Dataverse. https://doi.org/10.7910/DVN/BWKWOY; https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/BWKWOY
+
 Keçeci, M. (2026). Non-Lineer Alan Teorilerinden Topolojik Kuantum Hesaplamaya Karma Ardaşık Düzen Modellemesi ve Verimlilik Analizi. Open Science Articles (OSAs), Zenodo. https://doi.org/10.5281/zenodo.23096428
 
 Keçeci, M. (2026). Keçeci Eğrisi Âilesinin Yerellik Performansı ve Kuantum Durum Simülasyonlarındaki Uygulamaları. Open Science Articles (OSAs), Zenodo. https://doi.org/10.5281/zenodo.20263326
@@ -638,4 +640,10 @@ Keçeci, M. (2026). Kuantum Hesaplamada Uzay Dolduran Eğriler: Moleküler Simü
 Keçeci, M. (2026). kececicurve. Open Science Articles (OSAs), Zenodo. https://doi.org/10.5281/zenodo.19696338
 
 Keçeci, M. (2026). spacecurves. Open Science Articles (OSAs), Zenodo. https://doi.org/10.5281/zenodo.19672791
+
+https://pypi.org/project/kececicurve
+
+https://anaconda.org/bilgi/kececicurve
+
+https://prefix.dev/channels/bilgi/packages/kececicurve 
 
