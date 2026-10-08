@@ -289,8 +289,171 @@ Bu interaktif menü, **çiçek desenlerinden kuantum algoritmalarına** kadar 30
    0. Exit / Çıkış
 ======================================================================
 
-Seçiminiz (1-61):
+Seçiminiz (1-63):
 
+ENGLISH
+
+Keçeci Curve Visualization Menu
+Pattern Galleries
+1. Flower Patterns
+2. Galaxy Patterns
+3. Snowflake Patterns
+4. Mandala Patterns
+5. Fractal Trees
+6. Marine Patterns
+7. Cosmic Web
+8. Neural Network Patterns
+9. Virus Patterns
+10. Keçeci Curve Gallery
+Curve Comparisons
+11. Locality Heatmap
+12. Continuity Visualization
+13. Radar Chart Comparison
+14. Start-End Comparison
+15. Comprehensive Comparison (Table)
+16. Locality Combined Score
+17. Indexing Performance Comparison
+Quantum Visualizations
+18. Majorana Zero Modes
+19. Weyl Semimetal
+20. Stratum Architecture
+21. 3D Wigner Function
+22. Entanglement Network 3D
+23. Adiabatic Quantum Process 3D
+24. Topological Anyons 3D
+25. Quantum Fourier Transform Spectrum 3D
+Quantum Algorithms
+26. Shor Algorithm
+27. Grover Algorithm
+28. Deutsch-Jozsa Algorithm
+29. Quantum Error Correction
+30. Bloch Sphere States
+31. Superposition States
+32. Entanglement (Bell States)
+33. Coherence → Decoherence
+34. Quantum Tunneling
+35. Interference Patterns
+36. Wave Function Collapse
+Keçeci Parameter Effects
+37. Effect of Child Count
+38. Effect of Growth Mode
+39. Effect of Ordering Strategy
+40. Effect of Scale Factor
+41. Effect of Angle Parameters
+Sierpiński & Peano Specials
+42. Sierpiński Comparison
+43. Sierpiński Curve
+44. Sierpiński Process
+45. Sierpiński Triangle
+46. Sierpiński Verification Test
+47. Peano Curve
+48. Peano Verification Test
+Additional Comparisons & Analyses
+49. Curve Process by Level
+50. Locality
+51. Keçeci Parametric Variations
+52. Keçeci Parametric Variations (inherit_parent_angle=True)
+53. Detailed Radar Comparison
+54. Locality Heatmap – Both Normalizations
+55. Image Signature & Verification
+56. Keçeci Sampling RNG
+57. Key Derivation from Image
+58. Batch Image Encryption
+59. Using Permutation Parameters as Keys
+60. Image Encrypt/Decrypt
+Cryptography
+55. Image Signature & Verification
+56. Keçeci Sampling RNG
+57. Key Derivation from Image
+58. Batch Image Encryption
+59. Using Permutation Parameters as Keys
+60. Image Encrypt/Decrypt
+Game
+61. Turtle Ninja vs. White Rabbit Game (Random Number Guessing)
+Decimation
+62. Decimation (RDP and Distance Comparison)
+Julia Set
+63. Keçeci Curve × Julia Set
+
+---
+
+🇹🇷 TÜRKÇE
+
+Keçeci Eğrisi Görselleştirme Menüsü
+Desen Galerileri
+1. Çiçek Desenleri
+2. Galaksi Desenleri
+3. Kar Taneleri
+4. Mandala Desenleri
+5. Fraktal Ağaçlar
+6. Deniz Canlıları
+7. Kozmik Ağ
+8. Sinir Ağı Desenleri
+9. Virüs Desenleri
+10. Keçeci Eğri Galerisi
+Eğri Karşılaştırmaları
+11. Lokalite Isı Haritası
+12. Süreklilik Görselleştirmesi
+13. Radar Grafik Karşılaştırması
+14. Başlangıç-Bitiş Karşılaştırması
+15. Kapsamlı Karşılaştırma (Tablo)
+16. Lokalite Birleşik Skoru
+17. Veri İndeksleme Karşılaştırması
+Kuantum Görselleştirmeleri
+18. Majorana Sıfır Modları
+19. Weyl Yarımetali
+20. Stratum Mimarisi
+21. 3B Wigner Fonksiyonu
+22. Dolanıklık Ağı 3B
+23. Adiabatik Kuantum Süreci 3B
+24. Topolojik Anyonlar 3B
+25. Kuantum Fourier Dönüşümü Spektrumu 3B
+Kuantum Algoritmaları
+26. Shor Algoritması
+27. Grover Algoritması
+28. Deutsch-Jozsa Algoritması
+29. Kuantum Hata Düzeltme
+30. Bloch Küresi Durumları
+31. Süperpozisyon Durumları
+32. Dolanıklık (Bell Durumları)
+33. Koherens → Dekoherens
+34. Kuantum Tünelleme
+35. Girişim Desenleri
+36. Dalga Fonksiyonu Çöküşü
+Keçeci Parametre Etkileri
+37. Çocuk Sayısının Etkisi
+38. Büyüme Modunun Etkisi
+39. Sıralama Stratejisinin Etkisi
+40. Ölçek Faktörünün Etkisi
+41. Açı Parametrelerinin Etkisi
+Sierpiński ve Peano Özel
+42. Sierpiński Karşılaştırması
+43. Sierpiński Eğrisi
+44. Sierpiński Süreci
+45. Sierpiński Üçgeni
+46. Sierpiński Doğrulama Testi
+47. Peano Eğrisi
+48. Peano Doğrulama Testi
+Ek Karşılaştırma ve Analizler
+49. Eğrilerin Seviyeye Göre Gelişimi
+50. Lokalite
+51. Keçeci Parametrik Varyasyonları
+52. Keçeci Parametrik Varyasyonları (inherit_parent_angle=True)
+53. Detaylı Radar Karşılaştırması
+54. Lokalite Isı Haritası – İki Normalizasyon
+Kriptografi
+55. Görüntü İmzalama ve Doğrulama
+56. Keçeci Örnekleme Rastgele Sayı Üreteci (RNG)
+57. Görüntüden Anahtar Türetme
+58. Toplu Görüntü Şifreleme
+59. Permütasyon Parametrelerini Anahtar Olarak Kullanma
+60. Görüntü Şifreleme / Deşifreleme
+Oyun
+61. Kaplumbağa Ninja vs. Beyaz Tavşan Oyunu (Rastgele Sayı Tahmini)
+Seyreltme (Decimation)
+62. Seyreltme (RDP ve Mesafe Karşılaştırması)
+Julia Seti
+63. Keçeci Eğrisi × Julia Seti
 
 ---
 
