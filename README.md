@@ -641,9 +641,19 @@ Keçeci, M. (2026). kececicurve. Open Science Articles (OSAs), Zenodo. https://d
 
 Keçeci, M. (2026). spacecurves. Open Science Articles (OSAs), Zenodo. https://doi.org/10.5281/zenodo.19672791
 
+https://github.com/WhiteSymmetry/kececicurve
+
 https://pypi.org/project/kececicurve
 
-https://anaconda.org/bilgi/kececicurve
+https://anaconda.org/channels/bilgi/packages/kececicurve
 
-https://prefix.dev/channels/bilgi/packages/kececicurve 
+https://prefix.dev/channels/bilgi/packages/kececicurve
+
+https://github.com/WhiteSymmetry/spacecurves
+
+https://pypi.org/project/spacecurves
+
+https://anaconda.org/channels/bilgi/packages/spacecurves
+
+https://prefix.dev/channels/bilgi/packages/spacecurves
 
